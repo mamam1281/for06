@@ -1,0 +1,200 @@
+# CSS Variables 목록
+
+Next.js 15.3.3, Tailwind CSS 4.1.8 기반 버튼 시스템의 CSS Variables 정의서입니다.
+
+## 8px 그리드 시스템
+
+### Spacing Variables
+```css
+/* 기본 간격 시스템 - 8px 기반 */
+--spacing-0: 0px;
+--spacing-1: 8px;     /* 기본 단위 */
+--spacing-2: 16px;    /* 2 * 8px */
+--spacing-3: 24px;    /* 3 * 8px */
+--spacing-4: 32px;    /* 4 * 8px */
+--spacing-5: 40px;    /* 5 * 8px */
+--spacing-6: 48px;    /* 6 * 8px */
+--spacing-8: 64px;    /* 8 * 8px */
+--spacing-10: 80px;   /* 10 * 8px */
+--spacing-12: 96px;   /* 12 * 8px */
+```
+
+### 버튼 특화 Variables
+
+#### 패딩 시스템
+```css
+/* 버튼 패딩 - 8px 그리드 준수 */
+--btn-padding-sm: var(--spacing-1) var(--spacing-2);    /* 8px 16px */
+--btn-padding-md: var(--spacing-2) var(--spacing-3);    /* 16px 24px */
+--btn-padding-lg: var(--spacing-2) var(--spacing-4);    /* 16px 32px */
+```
+
+#### 높이 시스템
+```css
+/* 버튼 높이 - 8px 단위 */
+--btn-height-sm: var(--spacing-4);   /* 32px (4 * 8px) */
+--btn-height-md: var(--spacing-5);   /* 40px (5 * 8px) */
+--btn-height-lg: var(--spacing-6);   /* 48px (6 * 8px) */
+```
+
+#### 아이콘 크기
+```css
+/* 아이콘 크기 */
+--icon-sm: 16px;
+--icon-md: 20px;
+--icon-lg: 24px;
+```
+
+## 색상 시스템
+
+### Primary Colors
+```css
+/* 주요 색상 */
+--primary-gradient: linear-gradient(90deg, #7B29CD 0%, #870DD1 37.5%, #5B30F6 67.5%, #8054F2 96%);
+--primary-accent: #ff4516;
+--primary-success: #10B981;
+--primary-error: #B90C29;
+--primary-info: #135B79;
+```
+
+### Neutral Colors
+```css
+/* 중성 색상 */
+--neutral-900: #1a1a1a;  /* 배경 */
+--neutral-800: #2d2d2d;  /* 카드 배경 */
+--neutral-700: #333333;  /* 버튼 기본 */
+--neutral-600: #404040;  /* 버튼 호버 */
+--neutral-500: #A0A0A0;  /* 테두리 */
+--neutral-400: #D1D5DB;  /* 텍스트 보조 */
+```
+
+### Shadow Colors
+```css
+/* 그림자 색상 */
+--shadow-primary: rgba(123, 41, 205, 0.15);
+--shadow-accent: rgba(255, 69, 22, 0.2);
+--shadow-success: rgba(16, 185, 129, 0.2);
+--shadow-error: rgba(185, 12, 41, 0.2);
+```
+
+## Tailwind CSS 4.x 통합
+
+### @theme inline 정의
+```css
+@theme inline {
+  /* 8px 그리드를 Tailwind에 통합 */
+  --spacing-grid-1: var(--spacing-1);
+  --spacing-grid-2: var(--spacing-2);
+  --spacing-grid-3: var(--spacing-3);
+  --spacing-grid-4: var(--spacing-4);
+  --spacing-grid-5: var(--spacing-5);
+  --spacing-grid-6: var(--spacing-6);
+}
+```
+
+## 유틸리티 클래스
+
+### 8px 그리드 유틸리티
+```css
+@layer utilities {
+  /* 패딩 유틸리티 */
+  .p-grid-1 { padding: var(--spacing-1); }
+  .p-grid-2 { padding: var(--spacing-2); }
+  .p-grid-3 { padding: var(--spacing-3); }
+  .p-grid-4 { padding: var(--spacing-4); }
+  .p-grid-5 { padding: var(--spacing-5); }
+  .p-grid-6 { padding: var(--spacing-6); }
+
+  /* 마진 유틸리티 */
+  .m-grid-1 { margin: var(--spacing-1); }
+  .m-grid-2 { margin: var(--spacing-2); }
+  .m-grid-3 { margin: var(--spacing-3); }
+
+  /* 간격 유틸리티 */
+  .gap-grid-1 { gap: var(--spacing-1); }
+  .gap-grid-2 { gap: var(--spacing-2); }
+  .gap-grid-3 { gap: var(--spacing-3); }
+}
+```
+
+## 사용 예시
+
+### TypeScript에서 CSS Variables 활용
+```typescript
+// CSS Variables를 TypeScript에서 타입 안전하게 사용
+const buttonSizes = {
+  sm: 'var(--btn-height-sm)',
+  md: 'var(--btn-height-md)',
+  lg: 'var(--btn-height-lg)'
+} as const;
+
+const spacing = {
+  1: 'var(--spacing-1)',
+  2: 'var(--spacing-2)',
+  3: 'var(--spacing-3)'
+} as const;
+```
+
+### React 컴포넌트에서 활용
+```tsx
+// 동적 스타일 적용
+const Button = ({ size = 'md' }) => {
+  const style = {
+    height: `var(--btn-height-${size})`,
+    padding: `var(--btn-padding-${size})`,
+    borderRadius: 'var(--spacing-1)' // 8px
+  };
+  
+  return <button style={style}>버튼</button>;
+};
+```
+
+### Tailwind 클래스 활용
+```tsx
+// 8px 그리드 시스템 활용
+<div className="p-grid-3 gap-grid-2">
+  <Button size="sm" className="h-[var(--btn-height-sm)]" />
+  <Button size="md" className="h-[var(--btn-height-md)]" />
+  <Button size="lg" className="h-[var(--btn-height-lg)]" />
+</div>
+```
+
+## 디자인 토큰 매핑
+
+| 디자인 토큰 | CSS Variable | 값 | 용도 |
+|------------|-------------|-----|------|
+| spacing.xs | --spacing-1 | 8px | 최소 간격 |
+| spacing.sm | --spacing-2 | 16px | 작은 간격 |
+| spacing.md | --spacing-3 | 24px | 중간 간격 |
+| spacing.lg | --spacing-4 | 32px | 큰 간격 |
+| button.height.sm | --btn-height-sm | 32px | 작은 버튼 |
+| button.height.md | --btn-height-md | 40px | 중간 버튼 |
+| button.height.lg | --btn-height-lg | 48px | 큰 버튼 |
+
+## 확장 가이드
+
+### 새로운 Variables 추가 시
+```css
+/* 1. 8px 배수로 정의 */
+--spacing-7: 56px;    /* 7 * 8px */
+--spacing-9: 72px;    /* 9 * 8px */
+
+/* 2. 의미적 이름 부여 */
+--btn-height-xl: var(--spacing-7);  /* 56px */
+
+/* 3. 유틸리티 클래스 추가 */
+.p-grid-7 { padding: var(--spacing-7); }
+```
+
+### 색상 Variables 확장
+```css
+/* 테마별 색상 추가 */
+--primary-50: #faf5ff;
+--primary-100: #f3e8ff;
+--primary-500: #7B29CD;
+--primary-900: #4c1d95;
+
+/* 상태별 색상 */
+--btn-primary-active: #1a1a1a;
+--btn-primary-disabled: rgba(45, 45, 45, 0.5);
+```

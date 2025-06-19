@@ -1,0 +1,791 @@
+# ⚡ 애니메이션 타이밍 함수
+
+CJ AI Dashboard 컴포넌트에서 사용하는 모든 애니메이션 타이밍 함수와 설정입니다.
+
+## 📋 목차
+- [Framer Motion 설정](#framer-motion-설정)
+- [CSS 전환 효과](#css-전환-효과)
+- [커스텀 이징 함수](#커스텀-이징-함수)
+- [컴포넌트별 애니메이션](#컴포넌트별-애니메이션)
+- [성능 최적화](#성능-최적화)
+- [사용 예시](#사용-예시)
+
+---
+
+## 🎭 Framer Motion 설정
+
+### 기본 애니메이션 구성
+```typescript
+export const animationConfig = {
+  // 진입 애니메이션 - 페이드인 + 슬라이드
+  entrance: {
+    initial: { opacity: 0, y: 20 },
+    animate: { opacity: 1, y: 0 },
+    transition: { 
+      duration: 0.5, 
+      ease: [0.25, 0.46, 0.45, 0.94] // easeOutQuart
+    }
+  },
+
+  // 빠른 진입 애니메이션
+  entranceFast: {
+    initial: { opacity: 0, y: 10 },
+    animate: { opacity: 1, y: 0 },
+    transition: { 
+      duration: 0.3, 
+      ease: [0.25, 0.46, 0.45, 0.94]
+    }
+  },
+
+  // 느린 진입 애니메이션
+  entranceSlow: {
+    initial: { opacity: 0, y: 30 },
+    animate: { opacity: 1, y: 0 },
+    transition: { 
+      duration: 0.8, 
+      ease: [0.25, 0.46, 0.45, 0.94]
+    }
+  },
+
+  // 좌측에서 슬라이드
+  slideInLeft: {
+    initial: { opacity: 0, x: -50 },
+    animate: { opacity: 1, x: 0 },
+    transition: { 
+      duration: 0.6, 
+      ease: [0.25, 0.46, 0.45, 0.94]
+    }
+  },
+
+  // 우측에서 슬라이드
+  slideInRight: {
+    initial: { opacity: 0, x: 50 },
+    animate: { opacity: 1, x: 0 },
+    transition: { 
+      duration: 0.6, 
+      ease: [0.25, 0.46, 0.45, 0.94]
+    }
+  },
+
+  // 퇴장 애니메이션
+  exit: {
+    initial: { opacity: 1, scale: 1 },
+    exit: { opacity: 0, scale: 0.95 },
+    transition: { 
+      duration: 0.2, 
+      ease: [0.4, 0, 1, 1]
+    }
+  }
+};
+```
+
+### 인터랙션 애니메이션
+```typescript
+export const interactionAnimations = {
+  // 스케일 애니메이션 - 일반적인 버튼 호버
+  scale: {
+    whileHover: { scale: 1.05 },
+    whileTap: { scale: 0.95 },
+    transition: { 
+      type: "spring", 
+      stiffness: 400, 
+      damping: 17 
+    }
+  },
+
+  // 부드러운 스케일
+  scaleSubtle: {
+    whileHover: { scale: 1.02 },
+    whileTap: { scale: 0.98 },
+    transition: { 
+      type: "spring", 
+      stiffness: 300, 
+      damping: 20 
+    }
+  },
+
+  // 강한 스케일
+  scaleBold: {
+    whileHover: { scale: 1.1 },
+    whileTap: { scale: 0.9 },
+    transition: { 
+      type: "spring", 
+      stiffness: 500, 
+      damping: 15 
+    }
+  },
+
+  // 회전 + 스케일
+  rotateScale: {
+    whileHover: { scale: 1.05, rotate: 5 },
+    whileTap: { scale: 0.95, rotate: -5 },
+    transition: { 
+      type: "spring", 
+      stiffness: 300, 
+      damping: 20 
+    }
+  }
+};
+```
+
+### 반복 애니메이션
+```typescript
+export const loopAnimations = {
+  // 회전 애니메이션 - 로딩 스피너
+  rotation: {
+    animate: { rotate: 360 },
+    transition: { 
+      duration: 2, 
+      ease: "linear", 
+      repeat: Infinity 
+    }
+  },
+
+  // 빠른 회전
+  rotationFast: {
+    animate: { rotate: 360 },
+    transition: { 
+      duration: 1, 
+      ease: "linear", 
+      repeat: Infinity 
+    }
+  },
+
+  // 느린 회전
+  rotationSlow: {
+    animate: { rotate: 360 },
+    transition: { 
+      duration: 4, 
+      ease: "linear", 
+      repeat: Infinity 
+    }
+  },
+
+  // 펄스 애니메이션
+  pulse: {
+    animate: { 
+      scale: [1, 1.05, 1],
+      opacity: [1, 0.8, 1]
+    },
+    transition: { 
+      duration: 2, 
+      ease: "easeInOut", 
+      repeat: Infinity 
+    }
+  },
+
+  // 빠른 펄스
+  pulseFast: {
+    animate: { 
+      scale: [1, 1.03, 1],
+      opacity: [1, 0.9, 1]
+    },
+    transition: { 
+      duration: 1, 
+      ease: "easeInOut", 
+      repeat: Infinity 
+    }
+  },
+
+  // 부드러운 펄스
+  pulseSubtle: {
+    animate: { 
+      scale: [1, 1.02, 1]
+    },
+    transition: { 
+      duration: 3, 
+      ease: "easeInOut", 
+      repeat: Infinity 
+    }
+  },
+
+  // 바운스 애니메이션
+  bounce: {
+    animate: { 
+      y: [0, -10, 0]
+    },
+    transition: { 
+      duration: 1.5, 
+      ease: "easeInOut", 
+      repeat: Infinity 
+    }
+  },
+
+  // 흔들림 애니메이션
+  shake: {
+    animate: { 
+      x: [-2, 2, -2, 2, 0]
+    },
+    transition: { 
+      duration: 0.5, 
+      ease: "easeInOut"
+    }
+  }
+};
+```
+
+### 스프링 애니메이션 설정
+```typescript
+export const springConfigs = {
+  // 부드러운 스프링
+  gentle: {
+    type: "spring",
+    stiffness: 120,
+    damping: 20,
+    mass: 1
+  },
+
+  // 일반 스프링
+  default: {
+    type: "spring",
+    stiffness: 260,
+    damping: 20,
+    mass: 1
+  },
+
+  // 빠른 스프링
+  snappy: {
+    type: "spring",
+    stiffness: 400,
+    damping: 17,
+    mass: 1
+  },
+
+  // 탄력적인 스프링
+  bouncy: {
+    type: "spring",
+    stiffness: 300,
+    damping: 10,
+    mass: 1
+  },
+
+  // 느린 스프링
+  slow: {
+    type: "spring",
+    stiffness: 80,
+    damping: 25,
+    mass: 1.5
+  }
+};
+```
+
+---
+
+## 🎨 CSS 전환 효과
+
+### 기본 전환 시간
+```css
+/* 전환 지속 시간 */
+--transition-none: 0s;
+--transition-fast: 150ms;
+--transition-normal: 250ms;
+--transition-slow: 500ms;
+--transition-slower: 750ms;
+--transition-slowest: 1000ms;
+
+/* 속성별 전환 */
+--transition-colors: color 200ms ease-out, 
+                     background-color 200ms ease-out, 
+                     border-color 200ms ease-out;
+--transition-opacity: opacity 200ms ease-out;
+--transition-shadow: box-shadow 200ms ease-out;
+--transition-transform: transform 200ms ease-out;
+--transition-all: all 200ms ease-out;
+```
+
+### 이징 함수
+```css
+/* 기본 이징 */
+--ease-linear: linear;
+--ease-in: cubic-bezier(0.4, 0, 1, 1);
+--ease-out: cubic-bezier(0, 0, 0.2, 1);
+--ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+
+/* 커스텀 이징 */
+--ease-in-back: cubic-bezier(0.6, -0.28, 0.735, 0.045);
+--ease-out-back: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+--ease-in-out-back: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+--ease-in-circ: cubic-bezier(0.6, 0.04, 0.98, 0.335);
+--ease-out-circ: cubic-bezier(0.075, 0.82, 0.165, 1);
+--ease-in-out-circ: cubic-bezier(0.785, 0.135, 0.15, 0.86);
+
+--ease-in-expo: cubic-bezier(0.95, 0.05, 0.795, 0.035);
+--ease-out-expo: cubic-bezier(0.19, 1, 0.22, 1);
+--ease-in-out-expo: cubic-bezier(1, 0, 0, 1);
+```
+
+### 컴포넌트별 CSS 전환
+```css
+/* Token Balance Widget */
+.token-widget {
+  transition: var(--transition-all);
+}
+
+.token-widget:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+  transition: transform var(--transition-normal) var(--ease-out-back),
+              box-shadow var(--transition-normal) var(--ease-out);
+}
+
+/* Chat Bubble */
+.chat-bubble-button {
+  transition: var(--transition-transform);
+}
+
+.chat-bubble-button:hover {
+  transform: scale(1.1);
+  transition: transform var(--transition-fast) var(--ease-out-back);
+}
+
+.chat-bubble-message {
+  transition: var(--transition-opacity);
+}
+
+.chat-bubble-message.entering {
+  animation: slideInMessage var(--transition-normal) var(--ease-out);
+}
+
+@keyframes slideInMessage {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+```
+
+---
+
+## 🎯 커스텀 이징 함수
+
+### TypeScript/JavaScript 정의
+```typescript
+export const easingFunctions = {
+  // Quart 이징 (4차 함수)
+  easeInQuart: [0.5, 0, 0.75, 0] as const,
+  easeOutQuart: [0.25, 0.46, 0.45, 0.94] as const,
+  easeInOutQuart: [0.77, 0, 0.175, 1] as const,
+
+  // Back 이징 (백 이펙트)
+  easeInBack: [0.6, -0.28, 0.735, 0.045] as const,
+  easeOutBack: [0.175, 0.885, 0.32, 1.275] as const,
+  easeInOutBack: [0.68, -0.55, 0.265, 1.55] as const,
+
+  // Circ 이징 (원형)
+  easeInCirc: [0.6, 0.04, 0.98, 0.335] as const,
+  easeOutCirc: [0.075, 0.82, 0.165, 1] as const,
+  easeInOutCirc: [0.785, 0.135, 0.15, 0.86] as const,
+
+  // Expo 이징 (지수)
+  easeInExpo: [0.95, 0.05, 0.795, 0.035] as const,
+  easeOutExpo: [0.19, 1, 0.22, 1] as const,
+  easeInOutExpo: [1, 0, 0, 1] as const,
+
+  // Elastic 이징 (탄성)
+  easeInElastic: [0.5, -0.25, 0.75, 1.25] as const,
+  easeOutElastic: [0.25, -0.25, 0.5, 1.25] as const,
+  easeInOutElastic: [0.5, -0.5, 0.5, 1.5] as const
+};
+
+// 사용 예시
+const transition = {
+  duration: 0.6,
+  ease: easingFunctions.easeOutBack
+};
+```
+
+### 시각적 이징 가이드
+```typescript
+export const easingGuide = {
+  // UI 요소 진입 - 자연스럽고 부드러운
+  entrance: easingFunctions.easeOutQuart,
+  
+  // UI 요소 퇴장 - 빠르게 사라짐
+  exit: easingFunctions.easeInQuart,
+  
+  // 버튼 호버 - 탄력적
+  buttonHover: easingFunctions.easeOutBack,
+  
+  // 모달/오버레이 - 부드럽게 나타남
+  modal: easingFunctions.easeOutCirc,
+  
+  // 로딩 애니메이션 - 일정한 속도
+  loading: 'linear',
+  
+  // 에러 알림 - 주의를 끄는 움직임
+  error: easingFunctions.easeOutElastic,
+  
+  // 성공 알림 - 부드럽고 긍정적
+  success: easingFunctions.easeOutBack
+};
+```
+
+---
+
+## 🎮 컴포넌트별 애니메이션
+
+### Token Balance Widget 애니메이션
+```typescript
+export const tokenWidgetAnimations = {
+  // 컨테이너 진입
+  container: {
+    initial: { opacity: 0, y: 20 },
+    animate: { opacity: 1, y: 0 },
+    transition: { 
+      duration: 0.5,
+      ease: easingFunctions.easeOutQuart
+    }
+  },
+
+  // 금액 변화 애니메이션
+  amountChange: {
+    key: (amount: number) => amount, // key prop으로 리렌더링 트리거
+    initial: { scale: 0.8, opacity: 0 },
+    animate: { scale: 1, opacity: 1 },
+    transition: { 
+      duration: 0.6, 
+      type: "spring", 
+      stiffness: 100,
+      damping: 15
+    }
+  },
+
+  // 상태 아이콘 회전
+  statusIcon: {
+    animate: (change: string) => ({
+      rotate: change === 'increase' ? 360 : 0
+    }),
+    transition: { 
+      duration: 0.8, 
+      ease: easingFunctions.easeInOutBack
+    }
+  },
+
+  // 트렌드 아이콘 등장
+  trendIcon: {
+    initial: { scale: 0 },
+    animate: { scale: 1 },
+    transition: { 
+      delay: 0.3, 
+      type: "spring", 
+      stiffness: 200,
+      damping: 12
+    }
+  },
+
+  // 상태바 채우기
+  statusBar: {
+    initial: { width: 0 },
+    animate: (status: string) => ({
+      width: status === 'critical' ? '20%' : 
+             status === 'warning' ? '60%' : '100%'
+    }),
+    transition: { 
+      duration: 1, 
+      delay: 0.5,
+      ease: easingFunctions.easeOutQuart
+    }
+  },
+
+  // 상태 메시지 등장
+  statusMessage: {
+    initial: { opacity: 0 },
+    animate: { opacity: 1 },
+    transition: { 
+      delay: 1,
+      duration: 0.3
+    }
+  }
+};
+```
+
+### Chat Bubble 애니메이션
+```typescript
+export const chatBubbleAnimations = {
+  // 채팅창 열기/닫기
+  chatWindow: {
+    initial: { opacity: 0, scale: 0.8, y: 20 },
+    animate: { opacity: 1, scale: 1, y: 0 },
+    exit: { opacity: 0, scale: 0.8, y: 20 },
+    transition: { 
+      duration: 0.3, 
+      type: "spring", 
+      stiffness: 200,
+      damping: 20
+    }
+  },
+
+  // 채팅 버튼
+  chatButton: {
+    whileHover: { scale: 1.1 },
+    whileTap: { scale: 0.9 },
+    transition: springConfigs.snappy
+  },
+
+  // 버튼 아이콘 변화
+  buttonIcon: {
+    initial: { rotate: 90, opacity: 0 },
+    animate: { rotate: 0, opacity: 1 },
+    exit: { rotate: -90, opacity: 0 },
+    transition: { duration: 0.2 }
+  },
+
+  // 펄스 효과
+  pulseEffect: {
+    animate: { 
+      scale: [1, 1.5, 1], 
+      opacity: [0.5, 0, 0.5] 
+    },
+    transition: { 
+      duration: 2, 
+      repeat: Infinity,
+      ease: "easeInOut"
+    }
+  },
+
+  // 메시지 등장
+  message: {
+    initial: { opacity: 0, y: 10 },
+    animate: { opacity: 1, y: 0 },
+    transition: { duration: 0.3 }
+  },
+
+  // 타이핑 인디케이터
+  typingDots: [
+    {
+      animate: { opacity: [0.4, 1, 0.4] },
+      transition: { 
+        duration: 1.5, 
+        repeat: Infinity, 
+        delay: 0 
+      }
+    },
+    {
+      animate: { opacity: [0.4, 1, 0.4] },
+      transition: { 
+        duration: 1.5, 
+        repeat: Infinity, 
+        delay: 0.2 
+      }
+    },
+    {
+      animate: { opacity: [0.4, 1, 0.4] },
+      transition: { 
+        duration: 1.5, 
+        repeat: Infinity, 
+        delay: 0.4 
+      }
+    }
+  ],
+
+  // 온라인 상태 표시
+  onlineIndicator: {
+    animate: { scale: [1, 1.2, 1] },
+    transition: { 
+      duration: 2, 
+      repeat: Infinity,
+      ease: "easeInOut"
+    }
+  }
+};
+```
+
+---
+
+## ⚡ 성능 최적화
+
+### GPU 가속 최적화
+```typescript
+// ✅ 권장: transform 속성 사용 (GPU 가속)
+const optimizedAnimation = {
+  whileHover: { 
+    scale: 1.05, // transform: scale(1.05)
+    y: -2        // transform: translateY(-2px)
+  }
+};
+
+// ❌ 비권장: layout 속성 사용 (CPU 처리)  
+const slowAnimation = {
+  whileHover: { 
+    width: '110%',  // layout 변경
+    height: '110%'  // layout 변경
+  }
+};
+```
+
+### 조건부 애니메이션
+```typescript
+const ConditionalAnimation = ({ 
+  shouldAnimate, 
+  children 
+}: {
+  shouldAnimate: boolean;
+  children: React.ReactNode;
+}) => {
+  if (!shouldAnimate) return <>{children}</>;
+  
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.3 }}
+    >
+      {children}
+    </motion.div>
+  );
+};
+```
+
+### 애니메이션 옵션
+```typescript
+export const performanceOptions = {
+  // 모션 감소 설정 존중
+  respectMotionPreference: {
+    initial: false,
+    animate: false,
+    transition: { duration: 0 }
+  },
+
+  // 저성능 디바이스용 단순 애니메이션
+  reducedMotion: {
+    initial: { opacity: 0 },
+    animate: { opacity: 1 },
+    transition: { duration: 0.2 }
+  },
+
+  // 일반 애니메이션
+  fullMotion: {
+    initial: { opacity: 0, y: 20, scale: 0.95 },
+    animate: { opacity: 1, y: 0, scale: 1 },
+    transition: { 
+      duration: 0.5,
+      ease: easingFunctions.easeOutBack
+    }
+  }
+};
+
+// 사용자 설정 감지
+const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const animationConfig = prefersReducedMotion 
+  ? performanceOptions.reducedMotion 
+  : performanceOptions.fullMotion;
+```
+
+---
+
+## 💡 사용 예시
+
+### 기본 컴포넌트 애니메이션
+```tsx
+import { motion } from 'framer-motion';
+import { animationConfig, easingFunctions } from './animation-timing';
+
+// 진입 애니메이션
+const AnimatedCard = () => (
+  <motion.div
+    {...animationConfig.entrance}
+    className="bg-white rounded-lg shadow-lg p-6"
+  >
+    <h3>애니메이션 카드</h3>
+  </motion.div>
+);
+
+// 호버 애니메이션
+const AnimatedButton = () => (
+  <motion.button
+    whileHover={{ scale: 1.05 }}
+    whileTap={{ scale: 0.95 }}
+    transition={{
+      type: "spring",
+      stiffness: 400,
+      damping: 17
+    }}
+    className="px-4 py-2 bg-blue-500 text-white rounded"
+  >
+    클릭하세요
+  </motion.button>
+);
+
+// 순차 애니메이션
+const StaggeredList = ({ items }: { items: string[] }) => (
+  <motion.ul
+    initial="hidden"
+    animate="visible"
+    variants={{
+      visible: {
+        transition: {
+          staggerChildren: 0.1
+        }
+      }
+    }}
+  >
+    {items.map((item, index) => (
+      <motion.li
+        key={index}
+        variants={{
+          hidden: { opacity: 0, y: 20 },
+          visible: { opacity: 1, y: 0 }
+        }}
+        transition={{
+          duration: 0.4,
+          ease: easingFunctions.easeOutQuart
+        }}
+      >
+        {item}
+      </motion.li>
+    ))}
+  </motion.ul>
+);
+```
+
+### CSS 애니메이션 사용
+```css
+/* 버튼 호버 효과 */
+.animated-button {
+  transition: var(--transition-all);
+  transform-origin: center;
+}
+
+.animated-button:hover {
+  transform: scale(1.05) translateY(-2px);
+  box-shadow: var(--shadow-lg);
+  transition: transform var(--transition-fast) var(--ease-out-back),
+              box-shadow var(--transition-normal) var(--ease-out);
+}
+
+/* 로딩 스피너 */
+.loading-spinner {
+  animation: spin 1s var(--ease-linear) infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* 페이드인 애니메이션 */
+.fade-in {
+  animation: fadeIn var(--transition-slow) var(--ease-out-quart);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+```
+
+---
+
+*마지막 업데이트: 2025년 6월 19일*
+*버전: 1.0.0*

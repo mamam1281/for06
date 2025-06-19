@@ -1,0 +1,381 @@
+# 애니메이션 타이밍 함수
+
+상용급 버튼 시스템의 애니메이션 타이밍과 성능 최적화 가이드입니다.
+
+## Framer Motion Variants
+
+### 기본 Motion Variants
+```typescript
+const motionVariants = {
+  default: { 
+    scale: 1, 
+    rotate: 0,
+    transition: { duration: 0 }
+  },
+  hover: { 
+    scale: 1.02, 
+    transition: { 
+      duration: 0.2, 
+      ease: "easeOut",
+      type: "spring",
+      stiffness: 400,
+      damping: 30
+    } 
+  },
+  tap: { 
+    scale: 0.98, 
+    transition: { 
+      duration: 0.1, 
+      ease: "easeInOut",
+      type: "spring",
+      stiffness: 600,
+      damping: 30
+    } 
+  },
+  loading: { 
+    scale: 1,
+    transition: { 
+      duration: 0.2, 
+      ease: "easeOut" 
+    }
+  }
+};
+```
+
+### 고급 애니메이션 Variants
+```typescript
+const advancedVariants = {
+  // 부드러운 페이드 효과
+  fadeIn: {
+    opacity: 1,
+    transition: {
+      duration: 0.3,
+      ease: "easeOut"
+    }
+  },
+  fadeOut: {
+    opacity: 0,
+    transition: {
+      duration: 0.2,
+      ease: "easeIn"
+    }
+  },
+  
+  // 슬라이드 효과
+  slideIn: {
+    x: 0,
+    opacity: 1,
+    transition: {
+      type: "spring",
+      stiffness: 300,
+      damping: 30,
+      mass: 0.8
+    }
+  },
+  
+  // 회전 효과 (미묘함)
+  rotateHover: {
+    rotate: 0.5,
+    scale: 1.015,
+    transition: {
+      duration: 0.3,
+      ease: "easeOut"
+    }
+  }
+};
+```
+
+## 상용급 애니메이션 수치
+
+### 개선 전 vs 개선 후
+
+#### 🚫 개선 전 (눈아픈 효과)
+```css
+/* 과도한 효과 - 사용하지 말 것 */
+.button-bad {
+  transition: all 0.3s ease;
+  filter: blur(0px);
+}
+
+.button-bad:hover {
+  transform: scale(1.05);        /* 너무 큰 스케일 */
+  filter: brightness(1.25) blur(2px);  /* 과도한 밝기 + 블러 */
+  box-shadow: 0 0 20px rgba(123, 41, 205, 0.8);  /* 강한 그림자 */
+}
+```
+
+#### ✅ 개선 후 (상용급)
+```css
+/* 적절한 효과 - 권장사항 */
+.button-good {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transform: translateZ(0);  /* GPU 가속 활성화 */
+}
+
+.button-good:hover {
+  transform: scale(1.02) translateZ(0);     /* 부드러운 스케일 */
+  filter: brightness(1.05) saturate(1.08); /* 자연스러운 밝기 */
+  box-shadow: 0 4px 12px rgba(123, 41, 205, 0.15);  /* 은은한 그림자 */
+}
+
+.button-good:active {
+  transform: scale(0.98) translateZ(0);     /* 피드백 효과 */
+  filter: brightness(0.95) saturate(0.95); /* 눌림 효과 */
+}
+```
+
+## CSS 트랜지션 타이밍
+
+### 기본 트랜지션
+```css
+/* 표준 트랜지션 */
+.btn-standard {
+  transition: all 0.2s ease-out;
+}
+
+/* 빠른 피드백 */
+.btn-fast {
+  transition: transform 0.1s ease-in-out,
+              background-color 0.15s ease-out,
+              border-color 0.15s ease-out;
+}
+
+/* 부드러운 효과 */
+.btn-smooth {
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+```
+
+### 베지어 곡선 정의
+```css
+/* 커스텀 이징 함수 */
+:root {
+  --ease-out-quad: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --ease-out-cubic: cubic-bezier(0.215, 0.61, 0.355, 1);
+  --ease-out-quart: cubic-bezier(0.165, 0.84, 0.44, 1);
+  --ease-out-expo: cubic-bezier(0.19, 1, 0.22, 1);
+  
+  /* 상용급 권장 */
+  --ease-button: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-gentle: cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+```
+
+## 성능 최적화
+
+### GPU 가속 활성화
+```css
+.btn-optimized {
+  /* GPU 레이어 생성 */
+  transform: translateZ(0);
+  /* 또는 */
+  will-change: transform;
+  
+  /* 하드웨어 가속 속성만 애니메이션 */
+  transition: transform 0.2s ease-out,
+              opacity 0.2s ease-out;
+}
+
+.btn-optimized:hover {
+  /* transform과 opacity만 변경 (리페인트 방지) */
+  transform: scale(1.02) translateZ(0);
+}
+```
+
+### 애니메이션 최적화 팁
+```css
+/* 좋은 예 - GPU 가속 속성 */
+.btn-good-perf {
+  transition: transform 0.2s, opacity 0.2s;
+}
+
+/* 나쁜 예 - 리플로우 유발 속성 */
+.btn-bad-perf {
+  transition: width 0.2s, height 0.2s, top 0.2s, left 0.2s;
+}
+```
+
+## 로딩 애니메이션
+
+### 스피너 애니메이션
+```css
+/* 부드러운 스피너 */
+@keyframes spin-smooth {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.spinner {
+  animation: spin-smooth 1s linear infinite;
+}
+
+/* 속도별 스피너 */
+.spinner-slow { animation-duration: 2s; }
+.spinner-normal { animation-duration: 1s; }
+.spinner-fast { animation-duration: 0.5s; }
+```
+
+### 진행률 애니메이션
+```css
+.progress-bar {
+  transition: width 0.3s ease-out;
+  transform: translateZ(0);
+}
+
+/* 부드러운 진행률 업데이트 */
+.progress-smooth {
+  transition: width 0.15s ease-out;
+}
+```
+
+## 접근성 고려사항
+
+### prefers-reduced-motion 지원
+```css
+/* 모션 민감성 사용자 지원 */
+@media (prefers-reduced-motion: reduce) {
+  .btn-accessible {
+    transition: none;
+    animation: none;
+  }
+  
+  .btn-accessible:hover {
+    transform: none;
+  }
+  
+  /* 필수 피드백만 유지 */
+  .btn-accessible:focus {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+  }
+}
+
+/* 기본 설정 */
+@media (prefers-reduced-motion: no-preference) {
+  .btn-accessible {
+    transition: all 0.2s ease-out;
+  }
+}
+```
+
+## React에서 애니메이션 구현
+
+### Framer Motion 컴포넌트
+```tsx
+import { motion } from 'framer-motion';
+
+const AnimatedButton = motion.button;
+
+const buttonVariants = {
+  default: { scale: 1, rotate: 0 },
+  hover: { 
+    scale: 1.02,
+    transition: { duration: 0.2, ease: "easeOut" }
+  },
+  tap: { 
+    scale: 0.98,
+    transition: { duration: 0.1 }
+  }
+};
+
+// 사용 예시
+<AnimatedButton
+  variants={buttonVariants}
+  initial="default"
+  whileHover="hover"
+  whileTap="tap"
+  transition={{ type: "spring", stiffness: 400, damping: 30 }}
+>
+  클릭하세요
+</AnimatedButton>
+```
+
+### 조건부 애니메이션
+```tsx
+const ConditionalButton = ({ loading, disabled }) => {
+  const variants = {
+    default: { scale: 1 },
+    loading: { 
+      scale: 1,
+      transition: { duration: 0.2 }
+    },
+    disabled: { 
+      scale: 1,
+      opacity: 0.5,
+      transition: { duration: 0.15 }
+    }
+  };
+
+  const currentState = loading ? 'loading' : disabled ? 'disabled' : 'default';
+
+  return (
+    <motion.button
+      variants={variants}
+      animate={currentState}
+      whileHover={!disabled && !loading ? { scale: 1.02 } : {}}
+      whileTap={!disabled && !loading ? { scale: 0.98 } : {}}
+    >
+      {loading ? '로딩 중...' : '버튼'}
+    </motion.button>
+  );
+};
+```
+
+## 애니메이션 성능 모니터링
+
+### 개발자 도구 활용
+```javascript
+// 애니메이션 성능 측정
+const measureAnimation = () => {
+  const start = performance.now();
+  
+  requestAnimationFrame(() => {
+    const end = performance.now();
+    console.log(`Animation frame time: ${end - start}ms`);
+  });
+};
+
+// 60fps 체크
+const checkFrameRate = () => {
+  let frames = 0;
+  let startTime = performance.now();
+  
+  const countFrames = () => {
+    frames++;
+    if (performance.now() - startTime >= 1000) {
+      console.log(`FPS: ${frames}`);
+      frames = 0;
+      startTime = performance.now();
+    }
+    requestAnimationFrame(countFrames);
+  };
+  
+  requestAnimationFrame(countFrames);
+};
+```
+
+## 권장사항 요약
+
+### ✅ 권장하는 애니메이션 수치
+- **스케일**: 1.01 ~ 1.02 (hover), 0.98 ~ 0.99 (active)
+- **밝기**: 105% ~ 108% (과도하지 않게)
+- **채도**: 105% ~ 108% (자연스럽게)
+- **지속시간**: 0.1s ~ 0.25s (빠른 피드백)
+- **이징**: ease-out 또는 cubic-bezier(0.4, 0, 0.2, 1)
+
+### ⚠️ 피해야 할 효과
+- blur 효과 (성능 저하)
+- 과도한 그림자 (시각적 피로)
+- 1.05 이상의 스케일 (과도함)
+- 0.3s 이상의 긴 애니메이션 (답답함)
+- 복합 트랜지션 (all transition 남용)
+
+### 🎯 목표 성능 지표
+- **60fps 유지**: 16.67ms 이하의 프레임 타임
+- **First Paint**: 100ms 이하
+- **Interaction to Paint**: 50ms 이하
+- **Animation Smoothness**: 97% 이상

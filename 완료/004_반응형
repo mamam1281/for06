@@ -1,0 +1,449 @@
+# 반응형 브레이크포인트
+
+Next.js 15.3.3과 Tailwind CSS 4.1.8 기반의 반응형 디자인 가이드입니다.
+
+## Tailwind CSS 4.x 브레이크포인트
+
+### 기본 브레이크포인트 정의
+```css
+/* Tailwind CSS 4.x 기본 브레이크포인트 */
+@media (min-width: 640px) { /* sm */ }
+@media (min-width: 768px) { /* md */ }
+@media (min-width: 1024px) { /* lg */ }
+@media (min-width: 1280px) { /* xl */ }
+@media (min-width: 1536px) { /* 2xl */ }
+```
+
+### 모바일 퍼스트 접근법
+```css
+/* 기본 스타일 (0px ~ 639px) - 모바일 */
+.button {
+  padding: var(--spacing-1) var(--spacing-2); /* 8px 16px */
+  font-size: 14px;
+  height: var(--btn-height-sm); /* 32px */
+}
+
+/* 작은 태블릿 (640px+) */
+@media (min-width: 640px) {
+  .button {
+    padding: var(--spacing-2) var(--spacing-3); /* 16px 24px */
+    font-size: 16px;
+    height: var(--btn-height-md); /* 40px */
+  }
+}
+
+/* 태블릿/노트북 (768px+) */
+@media (min-width: 768px) {
+  .button {
+    font-size: 16px;
+    height: var(--btn-height-md); /* 40px */
+  }
+}
+
+/* 데스크톱 (1024px+) */
+@media (min-width: 1024px) {
+  .button {
+    padding: var(--spacing-2) var(--spacing-4); /* 16px 32px */
+    font-size: 18px;
+    height: var(--btn-height-lg); /* 48px */
+  }
+}
+```
+
+## 디바이스별 최적화
+
+### 모바일 (0px ~ 639px)
+```css
+/* 모바일 최적화 */
+.mobile-optimized {
+  /* 터치 타겟 크기 최소 44px */
+  min-height: 44px;
+  min-width: 44px;
+  
+  /* 간격 최소화 */
+  gap: var(--spacing-1); /* 8px */
+  padding: var(--spacing-1) var(--spacing-2); /* 8px 16px */
+  
+  /* 작은 폰트 크기 */
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+/* 모바일 레이아웃 */
+.mobile-layout {
+  /* 세로 스택 */
+  flex-direction: column;
+  
+  /* 풀 너비 버튼 */
+  width: 100%;
+  
+  /* 작은 마진 */
+  margin: var(--spacing-1) 0;
+}
+```
+
+### 태블릿 (640px ~ 1023px)
+```css
+@media (min-width: 640px) and (max-width: 1023px) {
+  .tablet-optimized {
+    /* 중간 크기 */
+    height: var(--btn-height-md); /* 40px */
+    padding: var(--spacing-2) var(--spacing-3); /* 16px 24px */
+    
+    /* 적절한 간격 */
+    gap: var(--spacing-2); /* 16px */
+    
+    /* 중간 폰트 크기 */
+    font-size: 16px;
+    line-height: 1.5;
+  }
+  
+  .tablet-layout {
+    /* 가로 배치 시작 */
+    flex-direction: row;
+    
+    /* 자동 너비 */
+    width: auto;
+    
+    /* 중간 마진 */
+    margin: var(--spacing-2) var(--spacing-1);
+  }
+}
+```
+
+### 데스크톱 (1024px+)
+```css
+@media (min-width: 1024px) {
+  .desktop-optimized {
+    /* 큰 크기 */
+    height: var(--btn-height-lg); /* 48px */
+    padding: var(--spacing-2) var(--spacing-4); /* 16px 32px */
+    
+    /* 넓은 간격 */
+    gap: var(--spacing-3); /* 24px */
+    
+    /* 큰 폰트 크기 */
+    font-size: 18px;
+    line-height: 1.6;
+  }
+  
+  .desktop-layout {
+    /* 가로 배치 */
+    flex-direction: row;
+    
+    /* 호버 효과 강화 */
+    transition: all 0.2s ease-out;
+  }
+  
+  .desktop-optimized:hover {
+    /* 데스크톱에서만 호버 효과 */
+    transform: scale(1.02);
+  }
+}
+```
+
+## Tailwind 반응형 클래스
+
+### 크기 반응형
+```tsx
+// 반응형 크기 클래스
+<Button className="
+  h-8 sm:h-10 lg:h-12
+  text-sm sm:text-base lg:text-lg
+  px-4 sm:px-6 lg:px-8
+">
+  반응형 버튼
+</Button>
+```
+
+### 간격 반응형
+```tsx
+// 반응형 간격 (8px 그리드 시스템)
+<div className="
+  gap-grid-1 sm:gap-grid-2 lg:gap-grid-3
+  p-grid-2 sm:p-grid-3 lg:p-grid-4
+">
+  <Button>버튼 1</Button>
+  <Button>버튼 2</Button>
+</div>
+```
+
+### 레이아웃 반응형
+```tsx
+// 반응형 레이아웃
+<div className="
+  flex flex-col sm:flex-row
+  space-y-2 sm:space-y-0 sm:space-x-4
+  w-full sm:w-auto
+">
+  <Button fullWidth className="sm:w-auto">모바일: 풀 너비</Button>
+  <Button fullWidth className="sm:w-auto">태블릿+: 자동 너비</Button>
+</div>
+```
+
+## 컨테이너 기반 반응형
+
+### CSS Container Queries (실험적)
+```css
+/* 컨테이너 기반 반응형 */
+.button-container {
+  container-type: inline-size;
+}
+
+@container (min-width: 300px) {
+  .button-responsive {
+    padding: var(--spacing-2) var(--spacing-3);
+    font-size: 16px;
+  }
+}
+
+@container (min-width: 500px) {
+  .button-responsive {
+    padding: var(--spacing-2) var(--spacing-4);
+    font-size: 18px;
+  }
+}
+```
+
+## React 컴포넌트 반응형 구현
+
+### Hook 기반 반응형
+```tsx
+import { useState, useEffect } from 'react';
+
+const useBreakpoint = () => {
+  const [breakpoint, setBreakpoint] = useState('sm');
+  
+  useEffect(() => {
+    const checkBreakpoint = () => {
+      if (window.innerWidth >= 1024) setBreakpoint('lg');
+      else if (window.innerWidth >= 768) setBreakpoint('md');
+      else if (window.innerWidth >= 640) setBreakpoint('sm');
+      else setBreakpoint('xs');
+    };
+    
+    checkBreakpoint();
+    window.addEventListener('resize', checkBreakpoint);
+    return () => window.removeEventListener('resize', checkBreakpoint);
+  }, []);
+  
+  return breakpoint;
+};
+
+// 사용 예시
+const ResponsiveButton = () => {
+  const breakpoint = useBreakpoint();
+  
+  const getSize = () => {
+    if (breakpoint === 'lg') return 'lg';
+    if (breakpoint === 'md') return 'md';
+    return 'sm';
+  };
+  
+  return <Button size={getSize()}>반응형 버튼</Button>;
+};
+```
+
+### 조건부 렌더링
+```tsx
+const AdaptiveButton = () => {
+  const [isMobile, setIsMobile] = useState(false);
+  
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+  
+  return (
+    <Button
+      fullWidth={isMobile}
+      size={isMobile ? 'sm' : 'md'}
+      icon={isMobile ? undefined : <Download />}
+    >
+      {isMobile ? '다운로드' : '파일 다운로드'}
+    </Button>
+  );
+};
+```
+
+## 터치 디바이스 최적화
+
+### 터치 타겟 크기
+```css
+/* WCAG 권장 터치 타겟 크기 */
+.touch-target {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* 작은 화면에서 터치 영역 확장 */
+@media (max-width: 767px) {
+  .btn-touch {
+    padding: var(--spacing-2) var(--spacing-3); /* 16px 24px */
+    height: 44px; /* 최소 터치 크기 */
+  }
+}
+```
+
+### 터치 피드백
+```css
+/* 터치 디바이스 전용 피드백 */
+@media (hover: none) and (pointer: coarse) {
+  .btn-touch:active {
+    transform: scale(0.95);
+    background-color: var(--neutral-600);
+  }
+}
+
+/* 마우스 디바이스 전용 호버 */
+@media (hover: hover) and (pointer: fine) {
+  .btn-mouse:hover {
+    transform: scale(1.02);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+}
+```
+
+## 다크모드 반응형
+
+### 시스템 선호도 기반
+```css
+/* 라이트 모드 (기본) */
+.btn-theme {
+  background-color: var(--neutral-100);
+  color: var(--neutral-900);
+}
+
+/* 다크 모드 */
+@media (prefers-color-scheme: dark) {
+  .btn-theme {
+    background-color: var(--neutral-800);
+    color: var(--neutral-100);
+  }
+}
+
+/* 다크모드 클래스 기반 */
+.dark .btn-theme {
+  background-color: var(--neutral-800);
+  color: var(--neutral-100);
+}
+```
+
+## 성능 최적화
+
+### 반응형 이미지
+```tsx
+// 반응형 아이콘 로딩
+const ResponsiveIcon = ({ size }) => {
+  const iconSize = {
+    sm: 16,
+    md: 20,
+    lg: 24
+  }[size];
+  
+  return <Icon size={iconSize} />;
+};
+```
+
+### CSS-in-JS 최적화
+```tsx
+// styled-components 반응형
+const ResponsiveButton = styled.button`
+  padding: ${props => props.theme.spacing[1]} ${props => props.theme.spacing[2]};
+  font-size: 14px;
+  
+  @media (min-width: 640px) {
+    padding: ${props => props.theme.spacing[2]} ${props => props.theme.spacing[3]};
+    font-size: 16px;
+  }
+  
+  @media (min-width: 1024px) {
+    padding: ${props => props.theme.spacing[2]} ${props => props.theme.spacing[4]};
+    font-size: 18px;
+  }
+`;
+```
+
+## 테스트 가이드
+
+### 반응형 테스트 체크리스트
+- [ ] 모바일 (320px ~ 639px) 테스트
+- [ ] 태블릿 (640px ~ 1023px) 테스트  
+- [ ] 데스크톱 (1024px+) 테스트
+- [ ] 터치 디바이스에서 44px 최소 터치 타겟 확인
+- [ ] 호버 상태가 터치 디바이스에서 적절히 처리되는지 확인
+- [ ] 가로/세로 모드 전환 테스트
+- [ ] 고해상도 디스플레이 테스트
+
+### 브라우저 개발자 도구 활용
+```javascript
+// 브레이크포인트 테스트 헬퍼
+const testBreakpoints = () => {
+  const breakpoints = [320, 640, 768, 1024, 1280, 1536];
+  
+  breakpoints.forEach(width => {
+    console.log(`Testing breakpoint: ${width}px`);
+    // 브레이크포인트별 스타일 확인
+  });
+};
+```
+
+## 실제 사용 예시
+
+### E-commerce 버튼
+```tsx
+const PurchaseButton = ({ price, inStock }) => (
+  <Button
+    variant="gradient"
+    fullWidth
+    size="lg"
+    className="
+      h-12 sm:h-14 lg:h-16
+      text-base sm:text-lg lg:text-xl
+      px-6 sm:px-8 lg:px-10
+    "
+    disabled={!inStock}
+  >
+    <span className="block sm:hidden">구매 - ₩{price}</span>
+    <span className="hidden sm:block">지금 구매하기 - ₩{price.toLocaleString()}</span>
+  </Button>
+);
+```
+
+### 네비게이션 버튼
+```tsx
+const NavButton = ({ children, icon }) => (
+  <Button
+    variant="ghost"
+    className="
+      h-10 w-10 sm:h-auto sm:w-auto
+      p-2 sm:px-4 sm:py-2
+      text-xs sm:text-sm
+    "
+  >
+    <span className="sm:hidden">{icon}</span>
+    <span className="hidden sm:inline">{children}</span>
+  </Button>
+);
+```
+
+## 권장사항
+
+### ✅ 권장하는 반응형 패턴
+- **모바일 퍼스트**: 작은 화면부터 설계
+- **터치 친화적**: 44px 이상의 터치 타겟
+- **적응적 텍스트**: 화면 크기에 따른 텍스트 길이 조절
+- **점진적 개선**: 큰 화면에서 기능 추가
+- **성능 고려**: 불필요한 리렌더링 방지
+
+### ⚠️ 피해야 할 패턴
+- **데스크톱 우선**: 큰 화면부터 설계하지 말 것
+- **고정 크기**: px 단위보다는 rem, em 활용
+- **과도한 브레이크포인트**: 너무 많은 분기점 생성
+- **일관성 없는 간격**: 8px 그리드 시스템 무시
+- **터치 무시**: 마우스 전용 인터랙션 설계

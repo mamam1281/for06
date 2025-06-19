@@ -1,0 +1,293 @@
+# 🔄 상태 전환 다이어그램
+
+CJ AI Dashboard 컴포넌트들의 상태 전환과 생명주기를 시각적으로 설명하는 문서입니다.
+
+## 📋 목차
+- [Token Balance Widget 상태 전환](#token-balance-widget-상태-전환)
+- [CJ AI Chat Bubble 상태 전환](#cj-ai-chat-bubble-상태-전환)
+- [통합 애플리케이션 상태 흐름](#통합-애플리케이션-상태-흐름)
+- [에러 상태 처리](#에러-상태-처리)
+- [상태 관리 패턴](#상태-관리-패턴)
+- [상태 전환 구현](#상태-전환-구현)
+
+---
+
+## 💰 Token Balance Widget 상태 전환
+
+### 기본 상태 다이어그램
+```mermaid
+stateDiagram-v2
+    [*] --> Initializing
+    
+    Initializing --> Loading : 데이터 요청
+    Loading --> Normal : amount > 1,000,000
+    Loading --> Warning : 100,000 < amount ≤ 1,000,000  
+    Loading --> Critical : amount ≤ 100,000
+    Loading --> Error : 로드 실패
+    
+    Normal --> Warning : 잔고 감소
+    Normal --> Critical : 급격한 잔고 감소
+    Normal --> Refreshing : 데이터 새로고침
+    
+    Warning --> Normal : 잔고 증가
+    Warning --> Critical : 잔고 계속 감소
+    Warning --> Refreshing : 데이터 새로고침
+    
+    Critical --> Warning : 잔고 증가
+    Critical --> Normal : 잔고 대폭 증가
+    Critical --> Refreshing : 데이터 새로고침
+    
+    Refreshing --> Normal : 새로고침 완료 (정상)
+    Refreshing --> Warning : 새로고침 완료 (경고)
+    Refreshing --> Critical : 새로고침 완료 (위험)
+    Refreshing --> Error : 새로고침 실패
+    
+    Error --> Loading : 재시도
+    Error --> [*] : 컴포넌트 언마운트
+    
+    Normal --> [*] : 컴포넌트 언마운트
+    Warning --> [*] : 컴포넌트 언마운트
+    Critical --> [*] : 컴포넌트 언마운트
+    
+    state Normal {
+        [*] --> Stable
+        Stable --> Increasing : change = 'increase'
+        Stable --> Decreasing : change = 'decrease'
+        Increasing --> Stable : change = 'none'
+        Decreasing --> Stable : change = 'none'
+        Increasing --> Decreasing : 추세 변화
+        Decreasing --> Increasing : 추세 변화
+    }
+```
+
+### 상태별 속성 정의
+```typescript
+export interface TokenWidgetState {
+  status: 'initializing' | 'loading' | 'normal' | 'warning' | 'critical' | 'error' | 'refreshing';
+  subState?: 'stable' | 'increasing' | 'decreasing' | 'declining' | 'recovering';
+  amount: number;
+  previousAmount?: number;
+  change: ChangeDirection;
+  loading: boolean;
+  error?: Error | null;
+  lastUpdated?: Date;
+  isAnimating: boolean;
+  animationType?: 'entrance' | 'valueChange' | 'statusChange' | 'exit';
+}
+
+export const STATE_THRESHOLDS = {
+  CRITICAL_THRESHOLD: 100000,
+  WARNING_THRESHOLD: 1000000,
+  NORMAL_THRESHOLD: Infinity
+} as const;
+```
+
+---
+
+## 💬 CJ AI Chat Bubble 상태 전환
+
+### 채팅 상태 다이어그램
+```mermaid
+stateDiagram-v2
+    [*] --> Closed
+    
+    Closed --> Opening : 사용자 클릭
+    Opening --> Open : 애니메이션 완료
+    
+    Open --> Typing : 사용자 입력 시작
+    Open --> Closing : 닫기 버튼 클릭
+    
+    Typing --> Open : 입력 중단
+    Typing --> Sending : 메시지 전송
+    
+    Sending --> WaitingResponse : 전송 완료
+    Sending --> Open : 전송 실패
+    
+    WaitingResponse --> ReceivingResponse : AI 응답 시작
+    WaitingResponse --> Error : 응답 타임아웃
+    
+    ReceivingResponse --> Open : 응답 완료
+    ReceivingResponse --> Error : 응답 에러
+    
+    Closing --> Closed : 애니메이션 완료
+    
+    Error --> Open : 에러 해결/재시도
+    Error --> Closed : 에러로 인한 종료
+    
+    Open --> [*] : 컴포넌트 언마운트
+    Closed --> [*] : 컴포넌트 언마운트
+```
+
+### 채팅 상태 인터페이스
+```typescript
+export interface ChatBubbleState {
+  status: 'closed' | 'opening' | 'open' | 'typing' | 'sending' | 
+          'waitingResponse' | 'receivingResponse' | 'closing' | 'error';
+  messages: Message[];
+  inputValue: string;
+  isLoading: boolean;
+  error?: Error | null;
+  unreadCount: number;
+  isOpen: boolean;
+  isAnimating: boolean;
+  lastActivity?: Date;
+  connectionStatus: 'connected' | 'disconnected' | 'reconnecting';
+  aiTyping: boolean;
+}
+```
+
+---
+
+## 🔄 통합 애플리케이션 상태 흐름
+
+### 전체 시스템 상태 다이어그램
+```mermaid
+flowchart TD
+    A[App Initialization] --> B[Load Token Data]
+    B --> C[Initialize Chat Bot]
+    C --> D[Render Components]
+    
+    D --> E{User Interaction}
+    E -->|Token Simulation| F[Update Token State]
+    E -->|Chat Interaction| G[Handle Chat Message]
+    
+    F --> H[Trigger Animation]
+    H --> I[Update UI]
+    I --> E
+    
+    G --> J[Send to AI]
+    J --> K[Receive Response]
+    K --> L[Update Chat State]
+    L --> E
+    
+    E -->|Window Resize| M[Responsive Update]
+    M --> E
+```
+
+---
+
+## ⚠️ 에러 상태 처리
+
+### 에러 복구 플로우
+```mermaid
+stateDiagram-v2
+    [*] --> Normal
+    Normal --> ErrorDetected : 에러 발생
+    ErrorDetected --> ErrorDisplayed : 에러 메시지 표시
+    ErrorDisplayed --> Retrying : 사용자 재시도
+    ErrorDisplayed --> UserDismiss : 사용자 무시
+    Retrying --> Normal : 재시도 성공
+    Retrying --> ErrorDisplayed : 재시도 실패
+    UserDismiss --> Normal : 에러 무시하고 계속
+```
+
+---
+
+## 🏗️ 상태 관리 패턴
+
+### React Hook 기반 상태 관리
+```typescript
+export function useTokenWidget(initialAmount: number = 0) {
+  const [state, setState] = useState<TokenWidgetState>({
+    status: 'initializing',
+    amount: initialAmount,
+    change: 'none',
+    loading: false,
+    isAnimating: false
+  });
+
+  const updateAmount = useCallback((newAmount: number) => {
+    setState(prev => ({
+      ...prev,
+      amount: newAmount,
+      status: getStatusFromAmount(newAmount),
+      change: calculateChange(prev.amount, newAmount),
+      lastUpdated: new Date()
+    }));
+  }, []);
+
+  return { state, updateAmount };
+}
+
+export function useChatBubble() {
+  const [state, setState] = useState<ChatBubbleState>({
+    status: 'closed',
+    messages: [],
+    inputValue: '',
+    isLoading: false,
+    unreadCount: 0,
+    isOpen: false,
+    isAnimating: false,
+    connectionStatus: 'connected',
+    aiTyping: false
+  });
+
+  const sendMessage = useCallback(async (message: string) => {
+    setState(prev => ({ ...prev, status: 'sending' }));
+    // 메시지 처리 로직
+  }, []);
+
+  return { state, sendMessage };
+}
+```
+
+---
+
+## 🛠️ 상태 전환 구현
+
+### 상태 머신 팩토리
+```typescript
+export class StateMachineFactory {
+  static createTokenWidget(initialAmount: number = 0): TokenWidgetStateMachine {
+    return new TokenWidgetStateMachine(initialAmount);
+  }
+
+  static createChatBubble(): ChatBubbleStateMachine {
+    return new ChatBubbleStateMachine();
+  }
+}
+
+// 사용 예시
+const tokenMachine = StateMachineFactory.createTokenWidget(1000000);
+const chatMachine = StateMachineFactory.createChatBubble();
+
+// 상태 구독
+tokenMachine.subscribe(state => {
+  console.log('Token state changed:', state);
+});
+
+chatMachine.subscribe(state => {
+  console.log('Chat state changed:', state);
+});
+```
+
+### 상태 전환 테스트
+```typescript
+describe('State Transitions', () => {
+  it('should transition token widget states correctly', () => {
+    const machine = new TokenWidgetStateMachine(2000000);
+    
+    expect(machine.getState().status).toBe('initializing');
+    
+    machine.startLoading();
+    expect(machine.getState().status).toBe('loading');
+    
+    machine.updateAmount(50000);
+    expect(machine.getState().status).toBe('critical');
+  });
+
+  it('should handle chat bubble state transitions', () => {
+    const machine = new ChatBubbleStateMachine();
+    
+    expect(machine.getState().status).toBe('closed');
+    
+    machine.dispatch({ type: 'OPEN' });
+    expect(machine.getState().status).toBe('opening');
+  });
+});
+```
+
+---
+
+*마지막 업데이트: 2025년 6월 19일*
+*버전: 1.0.0*

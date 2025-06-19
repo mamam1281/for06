@@ -1,0 +1,989 @@
+# 🔧 컴포넌트 Props 정의
+
+CJ AI Dashboard의 모든 컴포넌트 Props 인터페이스와 사용법에 대한 상세 가이드입니다.
+
+## 📋 목차
+- [기본 타입 정의](#기본-타입-정의)
+- [Token Balance Widget Props](#token-balance-widget-props)
+- [CJ AI Chat Bubble Props](#cj-ai-chat-bubble-props)
+- [공통 인터페이스](#공통-인터페이스)
+- [타입 가드 함수](#타입-가드-함수)
+- [사용 예시](#사용-예시)
+
+---
+
+## 📝 기본 타입 정의
+
+### 기본 상태 타입
+```typescript
+/** 색상 상태 타입 */
+export type ColorStatus = 'normal' | 'warning' | 'critical';
+
+/** 변화 방향 타입 */
+export type ChangeDirection = 'none' | 'increase' | 'decrease';
+
+/** 메시지 발신자 타입 */
+export type MessageSender = 'user' | 'ai';
+
+/** 챗봇 위치 타입 */
+export type ChatPosition = 'bottom-right' | 'bottom-left' | 'top-right' | 'top-left';
+
+/** 첨부파일 타입 */
+export type AttachmentType = 'image' | 'file' | 'link';
+
+/** 애니메이션 타입 */
+export type AnimationType = 'none' | 'fade' | 'slide' | 'scale' | 'bounce';
+
+/** 테마 타입 */
+export type ThemeType = 'light' | 'dark' | 'auto';
+```
+
+### 반응형 값 타입
+```typescript
+/** 브레이크포인트 타입 */
+export type Breakpoint = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl';
+
+/** 반응형 값 인터페이스 */
+export interface ResponsiveValue<T> {
+  xs?: T;
+  sm?: T;
+  md?: T;
+  lg?: T;
+  xl?: T;
+  '2xl'?: T;
+}
+
+/** 반응형 크기 타입 */
+export type ResponsiveSize = ResponsiveValue<string | number>;
+
+/** 반응형 부울 타입 */
+export type ResponsiveBoolean = ResponsiveValue<boolean>;
+```
+
+---
+
+## 💰 Token Balance Widget Props
+
+### 기본 Props 인터페이스
+```typescript
+/** 토큰 메타데이터 인터페이스 */
+export interface TokenMetadata {
+  /** 마지막 업데이트 시간 */
+  lastUpdated?: Date;
+  /** 통화 단위 */
+  currency?: string;
+  /** 환율 */
+  exchangeRate?: number;
+  /** 일일 변화량 */
+  dailyChange?: number;
+  /** 일일 변화율 (%) */
+  dailyChangePercent?: number;
+  /** 주간 변화량 */
+  weeklyChange?: number;
+  /** 월간 변화량 */
+  monthlyChange?: number;
+  /** 추가 정보 */
+  additionalInfo?: Record<string, unknown>;
+}
+
+/** 토큰 상태 색상 정보 */
+export interface TokenStatusColors {
+  background: string;
+  border: string;
+  text: string;
+  glow: string;
+}
+
+/** 토큰 위젯 스타일 커스터마이징 */
+export interface TokenWidgetStyle {
+  /** 배경색 오버라이드 */
+  backgroundColor?: string;
+  /** 테두리 색상 오버라이드 */
+  borderColor?: string;
+  /** 텍스트 색상 오버라이드 */
+  textColor?: string;
+  /** 그림자 설정 */
+  boxShadow?: string;
+  /** 테두리 반지름 */
+  borderRadius?: string;
+  /** 폰트 크기 */
+  fontSize?: ResponsiveSize;
+}
+```
+
+### 메인 Props 인터페이스
+```typescript
+/** 토큰 위젯 Props */
+export interface TokenBalanceProps {
+  /** 
+   * 토큰 잔고 수량 
+   * @example 1234567
+   */
+  amount: number;
+  
+  /** 
+   * 토큰 상태
+   * @default 'normal'
+   * @description
+   * - normal: 정상 상태 (녹색)
+   * - warning: 경고 상태 (주황색) 
+   * - critical: 위험 상태 (빨간색)
+   */
+  status?: ColorStatus;
+  
+  /** 
+   * 토큰 변화 상태
+   * @default 'none'
+   * @description
+   * - none: 변화 없음
+   * - increase: 증가 (위쪽 화살표)
+   * - decrease: 감소 (아래쪽 화살표)
+   */
+  change?: ChangeDirection;
+  
+  /** 
+   * 추가 CSS 클래스 
+   * @example "max-w-md mx-auto"
+   */
+  className?: string;
+  
+  /** 
+   * 커스텀 포매팅 함수
+   * @param amount - 포매팅할 토큰 수량
+   * @returns 포매팅된 문자열
+   * @example (amount) => `${amount.toLocaleString()} CJ`
+   */
+  formatAmount?: (amount: number) => string;
+  
+  /** 
+   * 클릭 이벤트 핸들러
+   * @param event - 마우스 클릭 이벤트
+   */
+  onClick?: (event: React.MouseEvent<HTMLDivElement>) => void;
+  
+  /** 
+   * 더블클릭 이벤트 핸들러
+   * @param event - 마우스 더블클릭 이벤트
+   */
+  onDoubleClick?: (event: React.MouseEvent<HTMLDivElement>) => void;
+  
+  /** 
+   * 로딩 상태
+   * @default false
+   * @description true일 때 스켈레톤 UI 표시
+   */
+  loading?: boolean;
+  
+  /** 
+   * 애니메이션 비활성화
+   * @default false
+   * @description true일 때 모든 애니메이션 제거
+   */
+  disableAnimation?: boolean;
+  
+  /** 
+   * 커스텀 아이콘
+   * @description 기본 Coins 아이콘 대신 사용할 아이콘
+   * @example <CustomIcon className="w-5 h-5" />
+   */
+  customIcon?: React.ReactNode;
+  
+  /** 
+   * 추가 메타데이터
+   * @description 토큰 관련 추가 정보
+   */
+  metadata?: TokenMetadata;
+  
+  /** 
+   * 테스트용 ID
+   * @description 자동화 테스트를 위한 식별자
+   * @example "token-widget-main"
+   */
+  testId?: string;
+  
+  /** 
+   * 접근성 라벨
+   * @description 스크린 리더를 위한 설명
+   * @example "현재 토큰 잔고는 123만 4567개입니다"
+   */
+  ariaLabel?: string;
+  
+  /** 
+   * 스타일 커스터마이징
+   * @description 컴포넌트 스타일을 세밀하게 조정
+   */
+  customStyle?: TokenWidgetStyle;
+  
+  /** 
+   * 반응형 설정
+   * @description 브레이크포인트별 다른 동작 설정
+   */
+  responsive?: {
+    /** 모바일에서 숨김 */
+    hiddenOnMobile?: boolean;
+    /** 태블릿에서 다른 레이아웃 */
+    tabletLayout?: 'compact' | 'expanded';
+    /** 데스크톱 전용 기능 */
+    desktopFeatures?: boolean;
+  };
+  
+  /** 
+   * 애니메이션 설정
+   * @description 애니메이션 세부 설정
+   */
+  animationConfig?: {
+    /** 진입 애니메이션 타입 */
+    entrance?: AnimationType;
+    /** 진입 지연 시간 (ms) */
+    entranceDelay?: number;
+    /** 호버 애니메이션 활성화 */
+    enableHover?: boolean;
+    /** 값 변화 애니메이션 지속 시간 (ms) */
+    valueChangeDuration?: number;
+  };
+}
+```
+
+### 사용 예시
+```typescript
+// 기본 사용법
+<TokenBalanceWidget
+  amount={1234567}
+  status="normal"
+  change="increase"
+/>
+
+// 고급 설정
+<TokenBalanceWidget
+  amount={1234567}
+  status="warning"
+  change="decrease"
+  className="max-w-lg shadow-2xl"
+  formatAmount={(amount) => `${(amount / 1000000).toFixed(2)}M CJ`}
+  onClick={(e) => console.log('Widget clicked')}
+  metadata={{
+    lastUpdated: new Date(),
+    currency: 'KRW',
+    exchangeRate: 1200,
+    dailyChange: -50000,
+    dailyChangePercent: -4.2
+  }}
+  customStyle={{
+    backgroundColor: 'rgba(16, 185, 129, 0.05)',
+    borderColor: 'rgba(16, 185, 129, 0.2)',
+    borderRadius: '1rem'
+  }}
+  animationConfig={{
+    entrance: 'slide',
+    entranceDelay: 200,
+    enableHover: true,
+    valueChangeDuration: 800
+  }}
+  responsive={{
+    hiddenOnMobile: false,
+    tabletLayout: 'expanded',
+    desktopFeatures: true
+  }}
+  ariaLabel="현재 토큰 잔고는 123만 4567개, 경고 상태, 감소 추세입니다"
+  testId="main-token-widget"
+/>
+```
+
+---
+
+## 💬 CJ AI Chat Bubble Props
+
+### 메시지 관련 인터페이스
+```typescript
+/** 첨부파일 인터페이스 */
+export interface Attachment {
+  /** 파일 타입 */
+  type: AttachmentType;
+  /** 파일 URL */
+  url: string;
+  /** 파일 이름 */
+  name: string;
+  /** 파일 크기 (bytes) */
+  size?: number;
+  /** MIME 타입 */
+  mimeType?: string;
+  /** 썸네일 URL (이미지인 경우) */
+  thumbnail?: string;
+}
+
+/** 메시지 인터페이스 */
+export interface Message {
+  /** 고유 ID */
+  id: string;
+  /** 메시지 내용 */
+  text: string;
+  /** 발신자 */
+  sender: MessageSender;
+  /** 타임스탬프 */
+  timestamp: Date;
+  /** 타이핑 상태 */
+  isTyping?: boolean;
+  /** 첨부파일 목록 */
+  attachments?: Attachment[];
+  /** 메시지 메타데이터 */
+  metadata?: {
+    /** 읽음 상태 */
+    isRead?: boolean;
+    /** 에러 상태 */
+    hasError?: boolean;
+    /** 재시도 가능 여부 */
+    canRetry?: boolean;
+    /** AI 신뢰도 점수 (0-1) */
+    confidence?: number;
+    /** 응답 생성 시간 (ms) */
+    processingTime?: number;
+  };
+}
+```
+
+### 설정 인터페이스
+```typescript
+/** 챗봇 설정 인터페이스 */
+export interface ChatConfig {
+  /** 
+   * AI 어시스턴트 이름
+   * @default "CJ AI Assistant"
+   */
+  assistantName?: string;
+  
+  /** 
+   * 환영 메시지
+   * @default "안녕하세요! CJ AI 어시스턴트입니다. 무엇을 도와드릴까요? 😊"
+   */
+  welcomeMessage?: string;
+  
+  /** 
+   * 플레이스홀더 텍스트
+   * @default "메시지를 입력하세요..."
+   */
+  placeholder?: string;
+  
+  /** 
+   * 최대 메시지 수
+   * @default 100
+   * @description 이 수를 초과하면 오래된 메시지부터 제거
+   */
+  maxMessages?: number;
+  
+  /** 
+   * 타이핑 지연 시간 (ms)
+   * @default 1500
+   * @description AI 응답 전 타이핑 인디케이터 표시 시간
+   */
+  typingDelay?: number;
+  
+  /** 
+   * 자동 스크롤 여부
+   * @default true
+   * @description 새 메시지 시 자동으로 하단 스크롤
+   */
+  autoScroll?: boolean;
+  
+  /** 
+   * 메시지 전송 키
+   * @default 'Enter'
+   * @description 'Enter' | 'Ctrl+Enter' | 'Shift+Enter'
+   */
+  sendKey?: 'Enter' | 'Ctrl+Enter' | 'Shift+Enter';
+  
+  /** 
+   * 메시지 최대 길이
+   * @default 1000
+   */
+  maxMessageLength?: number;
+  
+  /** 
+   * 오프라인 모드 메시지
+   * @default "현재 오프라인 상태입니다. 네트워크 연결을 확인해주세요."
+   */
+  offlineMessage?: string;
+}
+
+/** 챗봇 콜백 인터페이스 */
+export interface ChatCallbacks {
+  /** 채팅창 열림 */
+  onOpen?: () => void;
+  /** 채팅창 닫힘 */
+  onClose?: () => void;
+  /** 메시지 전송됨 */
+  onMessageSent?: (message: string) => void;
+  /** 메시지 수신됨 */
+  onMessageReceived?: (message: string) => void;
+  /** 에러 발생 */
+  onError?: (error: Error) => void;
+  /** 타이핑 시작 */
+  onTypingStart?: () => void;
+  /** 타이핑 종료 */
+  onTypingEnd?: () => void;
+  /** 파일 업로드 */
+  onFileUpload?: (file: File) => Promise<string>;
+  /** 메시지 삭제 */
+  onMessageDelete?: (messageId: string) => void;
+  /** 메시지 편집 */
+  onMessageEdit?: (messageId: string, newText: string) => void;
+}
+
+/** 챗봇 기능 플래그 인터페이스 */
+export interface ChatFeatures {
+  /** 파일 업로드 */
+  fileUpload?: boolean;
+  /** 음성 입력 */
+  voiceInput?: boolean;
+  /** 메시지 검색 */
+  messageSearch?: boolean;
+  /** 메시지 기록 */
+  messageHistory?: boolean;
+  /** 이모지 선택기 */
+  emojiPicker?: boolean;
+  /** 메시지 편집 */
+  messageEdit?: boolean;
+  /** 메시지 삭제 */
+  messageDelete?: boolean;
+  /** 읽음 표시 */
+  readReceipts?: boolean;
+  /** 타이핑 인디케이터 */
+  typingIndicator?: boolean;
+  /** 메시지 시간 표시 */
+  messageTimestamp?: boolean;
+  /** 다크 모드 토글 */
+  darkModeToggle?: boolean;
+}
+
+/** 챗봇 테마 인터페이스 */
+export interface ChatTheme {
+  /** 기본 색상 */
+  primaryColor?: string;
+  /** 보조 색상 */
+  secondaryColor?: string;
+  /** 배경 색상 */
+  backgroundColor?: string;
+  /** 텍스트 색상 */
+  textColor?: string;
+  /** 테두리 색상 */
+  borderColor?: string;
+  /** 경계선 반지름 */
+  borderRadius?: string;
+  /** 그림자 */
+  boxShadow?: string;
+  /** 폰트 크기 */
+  fontSize?: string;
+  /** 폰트 패밀리 */
+  fontFamily?: string;
+  /** 사용자 메시지 배경색 */
+  userMessageBg?: string;
+  /** AI 메시지 배경색 */
+  aiMessageBg?: string;
+}
+```
+
+### 메인 Props 인터페이스
+```typescript
+/** 챗 버블 Props */
+export interface CJAIChatBubbleProps {
+  /** 
+   * 추가 CSS 클래스
+   * @example "custom-chat-bubble"
+   */
+  className?: string;
+  
+  /** 
+   * 챗봇 위치
+   * @default 'bottom-right'
+   */
+  position?: ChatPosition;
+  
+  /** 
+   * 메시지 전송 핸들러
+   * @param message - 사용자가 보낸 메시지
+   * @returns AI 응답 메시지
+   * @example async (message) => await fetchAIResponse(message)
+   */
+  onSendMessage?: (message: string) => Promise<string>;
+  
+  /** 
+   * 초기 메시지 목록
+   * @description 챗봇 시작 시 표시할 메시지들
+   */
+  initialMessages?: Message[];
+  
+  /** 
+   * 챗봇 설정
+   * @description 챗봇 동작 관련 설정
+   */
+  config?: ChatConfig;
+  
+  /** 
+   * 이벤트 콜백
+   * @description 다양한 이벤트에 대한 콜백 함수들
+   */
+  callbacks?: ChatCallbacks;
+  
+  /** 
+   * 기능 플래그
+   * @description 활성화할 기능들 설정
+   */
+  features?: ChatFeatures;
+  
+  /** 
+   * 테마 설정
+   * @description 챗봇 UI 테마 커스터마이징
+   */
+  theme?: ChatTheme;
+  
+  /** 
+   * 테스트용 ID
+   * @example "main-chat-bubble"
+   */
+  testId?: string;
+  
+  /** 
+   * 접근성 설정
+   */
+  accessibility?: {
+    /** 스크린 리더용 라벨 */
+    ariaLabel?: string;
+    /** 키보드 내비게이션 활성화 */
+    keyboardNavigation?: boolean;
+    /** 고대비 모드 지원 */
+    highContrast?: boolean;
+  };
+  
+  /** 
+   * 성능 설정
+   */
+  performance?: {
+    /** 가상 스크롤 활성화 (메시지 많을 때) */
+    virtualScroll?: boolean;
+    /** 메시지 지연 로딩 */
+    lazyLoading?: boolean;
+    /** 디바운스 시간 (ms) */
+    debounceTime?: number;
+  };
+  
+  /** 
+   * 보안 설정
+   */
+  security?: {
+    /** HTML 새니타이징 */
+    sanitizeHTML?: boolean;
+    /** 링크 검증 */
+    validateLinks?: boolean;
+    /** 파일 업로드 제한 */
+    fileUploadRestrictions?: {
+      maxSize?: number; // bytes
+      allowedTypes?: string[];
+    };
+  };
+}
+```
+
+### 사용 예시
+```typescript
+// 기본 사용법
+<CJAIChatBubble
+  position="bottom-right"
+  onSendMessage={handleAIMessage}
+/>
+
+// 완전한 설정
+<CJAIChatBubble
+  position="bottom-right"
+  className="custom-chat"
+  onSendMessage={async (message) => {
+    const response = await fetch('/api/ai', {
+      method: 'POST',
+      body: JSON.stringify({ message })
+    });
+    return response.text();
+  }}
+  config={{
+    assistantName: "CJ AI 전문가",
+    welcomeMessage: "안녕하세요! 궁금한 것이 있으시면 언제든 물어보세요! 🤖",
+    placeholder: "질문을 입력해주세요...",
+    maxMessages: 200,
+    typingDelay: 2000,
+    sendKey: 'Ctrl+Enter',
+    maxMessageLength: 2000
+  }}
+  features={{
+    fileUpload: true,
+    voiceInput: false,
+    messageSearch: true,
+    messageHistory: true,
+    emojiPicker: true,
+    messageEdit: true,
+    messageDelete: true,
+    readReceipts: true,
+    typingIndicator: true,
+    messageTimestamp: true,
+    darkModeToggle: true
+  }}
+  callbacks={{
+    onOpen: () => analytics.track('chat_opened'),
+    onClose: () => analytics.track('chat_closed'),
+    onMessageSent: (msg) => console.log('Sent:', msg),
+    onMessageReceived: (msg) => console.log('Received:', msg),
+    onError: (error) => console.error('Chat error:', error),
+    onFileUpload: async (file) => {
+      const formData = new FormData();
+      formData.append('file', file);
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData
+      });
+      return response.json().then(data => data.url);
+    }
+  }}
+  theme={{
+    primaryColor: '#3b82f6',
+    secondaryColor: '#8b5cf6',
+    backgroundColor: 'rgba(15, 23, 42, 0.95)',
+    textColor: '#f1f5f9',
+    borderRadius: '1rem',
+    fontSize: '0.875rem'
+  }}
+  accessibility={{
+    ariaLabel: "CJ AI 채팅 어시스턴트",
+    keyboardNavigation: true,
+    highContrast: false
+  }}
+  performance={{
+    virtualScroll: true,
+    lazyLoading: true,
+    debounceTime: 300
+  }}
+  security={{
+    sanitizeHTML: true,
+    validateLinks: true,
+    fileUploadRestrictions: {
+      maxSize: 10 * 1024 * 1024, // 10MB
+      allowedTypes: ['image/*', '.pdf', '.txt']
+    }
+  }}
+  testId="main-chat-assistant"
+/>
+```
+
+---
+
+## 🔗 공통 인터페이스
+
+### 기본 컴포넌트 Props
+```typescript
+/** 모든 컴포넌트의 기본 Props */
+export interface BaseComponentProps {
+  /** 추가 CSS 클래스 */
+  className?: string;
+  /** 인라인 스타일 */
+  style?: React.CSSProperties;
+  /** 테스트용 ID */
+  testId?: string;
+  /** 데이터 속성 */
+  'data-*'?: string;
+  /** 접근성 속성 */
+  'aria-*'?: string;
+  /** 역할 */
+  role?: string;
+  /** 탭 인덱스 */
+  tabIndex?: number;
+}
+
+/** 이벤트 핸들러 Props */
+export interface EventHandlerProps {
+  /** 클릭 이벤트 */
+  onClick?: (event: React.MouseEvent) => void;
+  /** 더블클릭 이벤트 */
+  onDoubleClick?: (event: React.MouseEvent) => void;
+  /** 키보드 이벤트 */
+  onKeyDown?: (event: React.KeyboardEvent) => void;
+  onKeyUp?: (event: React.KeyboardEvent) => void;
+  onKeyPress?: (event: React.KeyboardEvent) => void;
+  /** 포커스 이벤트 */
+  onFocus?: (event: React.FocusEvent) => void;
+  onBlur?: (event: React.FocusEvent) => void;
+  /** 마우스 이벤트 */
+  onMouseEnter?: (event: React.MouseEvent) => void;
+  onMouseLeave?: (event: React.MouseEvent) => void;
+  onMouseOver?: (event: React.MouseEvent) => void;
+  onMouseOut?: (event: React.MouseEvent) => void;
+}
+
+/** 애니메이션 Props */
+export interface AnimationProps {
+  /** 애니메이션 비활성화 */
+  disableAnimation?: boolean;
+  /** 진입 애니메이션 */
+  enterAnimation?: AnimationType;
+  /** 퇴장 애니메이션 */
+  exitAnimation?: AnimationType;
+  /** 애니메이션 지속 시간 (ms) */
+  animationDuration?: number;
+  /** 애니메이션 지연 (ms) */
+  animationDelay?: number;
+}
+```
+
+### 폼 관련 Props
+```typescript
+/** 폼 컨트롤 기본 Props */
+export interface FormControlProps {
+  /** 필수 입력 여부 */
+  required?: boolean;
+  /** 비활성화 여부 */
+  disabled?: boolean;
+  /** 읽기 전용 여부 */
+  readOnly?: boolean;
+  /** 에러 상태 */
+  error?: boolean;
+  /** 에러 메시지 */
+  errorMessage?: string;
+  /** 도움말 텍스트 */
+  helpText?: string;
+  /** 라벨 */
+  label?: string;
+  /** 플레이스홀더 */
+  placeholder?: string;
+}
+
+/** 입력 검증 Props */
+export interface ValidationProps {
+  /** 최소 길이 */
+  minLength?: number;
+  /** 최대 길이 */
+  maxLength?: number;
+  /** 패턴 (정규식) */
+  pattern?: string;
+  /** 커스텀 검증 함수 */
+  validate?: (value: string) => boolean | string;
+  /** 실시간 검증 여부 */
+  validateOnChange?: boolean;
+}
+```
+
+---
+
+## 🛡️ 타입 가드 함수
+
+### 기본 타입 가드
+```typescript
+/** 메시지 타입 가드 */
+export const isMessage = (obj: unknown): obj is Message => {
+  return (
+    typeof obj === 'object' &&
+    obj !== null &&
+    'id' in obj &&
+    'text' in obj &&
+    'sender' in obj &&
+    'timestamp' in obj &&
+    typeof (obj as Message).id === 'string' &&
+    typeof (obj as Message).text === 'string' &&
+    ['user', 'ai'].includes((obj as Message).sender) &&
+    (obj as Message).timestamp instanceof Date
+  );
+};
+
+/** 첨부파일 타입 가드 */
+export const isAttachment = (obj: unknown): obj is Attachment => {
+  return (
+    typeof obj === 'object' &&
+    obj !== null &&
+    'type' in obj &&
+    'url' in obj &&
+    'name' in obj &&
+    ['image', 'file', 'link'].includes((obj as Attachment).type) &&
+    typeof (obj as Attachment).url === 'string' &&
+    typeof (obj as Attachment).name === 'string'
+  );
+};
+
+/** 토큰 메타데이터 타입 가드 */
+export const isTokenMetadata = (obj: unknown): obj is TokenMetadata => {
+  return (
+    typeof obj === 'object' &&
+    obj !== null &&
+    (!('lastUpdated' in obj) || (obj as TokenMetadata).lastUpdated instanceof Date) &&
+    (!('currency' in obj) || typeof (obj as TokenMetadata).currency === 'string') &&
+    (!('exchangeRate' in obj) || typeof (obj as TokenMetadata).exchangeRate === 'number')
+  );
+};
+
+/** 색상 상태 타입 가드 */
+export const isColorStatus = (value: unknown): value is ColorStatus => {
+  return typeof value === 'string' && ['normal', 'warning', 'critical'].includes(value);
+};
+
+/** 변화 방향 타입 가드 */
+export const isChangeDirection = (value: unknown): value is ChangeDirection => {
+  return typeof value === 'string' && ['none', 'increase', 'decrease'].includes(value);
+};
+
+/** 챗봇 위치 타입 가드 */
+export const isChatPosition = (value: unknown): value is ChatPosition => {
+  return typeof value === 'string' && 
+    ['bottom-right', 'bottom-left', 'top-right', 'top-left'].includes(value);
+};
+```
+
+### 복합 타입 가드
+```typescript
+/** 완전한 메시지 배열 타입 가드 */
+export const isMessageArray = (obj: unknown): obj is Message[] => {
+  return Array.isArray(obj) && obj.every(isMessage);
+};
+
+/** Props 검증 함수 */
+export const validateTokenBalanceProps = (props: Partial<TokenBalanceProps>): boolean => {
+  // amount는 필수이고 0 이상이어야 함
+  if (typeof props.amount !== 'number' || props.amount < 0) {
+    return false;
+  }
+  
+  // status가 있다면 유효한 값이어야 함
+  if (props.status && !isColorStatus(props.status)) {
+    return false;
+  }
+  
+  // change가 있다면 유효한 값이어야 함
+  if (props.change && !isChangeDirection(props.change)) {
+    return false;
+  }
+  
+  return true;
+};
+
+export const validateChatBubbleProps = (props: Partial<CJAIChatBubbleProps>): boolean => {
+  // position이 있다면 유효한 값이어야 함
+  if (props.position && !isChatPosition(props.position)) {
+    return false;
+  }
+  
+  // initialMessages가 있다면 유효한 메시지 배열이어야 함
+  if (props.initialMessages && !isMessageArray(props.initialMessages)) {
+    return false;
+  }
+  
+  return true;
+};
+```
+
+---
+
+## 💡 사용 예시
+
+### Props 전개 패턴
+```typescript
+// 기본 Props와 확장 Props 분리
+interface ExtendedTokenWidgetProps extends TokenBalanceProps {
+  customFeature?: boolean;
+  additionalData?: unknown;
+}
+
+const MyTokenWidget: React.FC<ExtendedTokenWidgetProps> = ({
+  customFeature,
+  additionalData,
+  ...tokenProps
+}) => {
+  return (
+    <div>
+      {customFeature && <div>Custom Feature</div>}
+      <TokenBalanceWidget {...tokenProps} />
+    </div>
+  );
+};
+```
+
+### 조건부 Props
+```typescript
+// 상태에 따른 조건부 Props
+type ConditionalTokenProps = 
+  | (TokenBalanceProps & { status: 'normal'; change?: 'increase' })
+  | (TokenBalanceProps & { status: 'warning' | 'critical'; change: 'decrease' });
+
+const ConditionalTokenWidget: React.FC<ConditionalTokenProps> = (props) => {
+  return <TokenBalanceWidget {...props} />;
+};
+```
+
+### 고차 컴포넌트 Props
+```typescript
+// HOC로 Props 확장
+interface WithAnalyticsProps {
+  trackingId?: string;
+  eventCategory?: string;
+}
+
+function withAnalytics<T extends object>(
+  Component: React.ComponentType<T>
+) {
+  return React.forwardRef<any, T & WithAnalyticsProps>((props, ref) => {
+    const { trackingId, eventCategory, ...componentProps } = props;
+    
+    // 분석 로직
+    const handleClick = (originalHandler?: Function) => (event: any) => {
+      if (trackingId) {
+        // 트래킹 코드
+      }
+      originalHandler?.(event);
+    };
+    
+    return (
+      <Component
+        ref={ref}
+        {...(componentProps as T)}
+        onClick={handleClick((componentProps as any).onClick)}
+      />
+    );
+  });
+}
+
+// 사용
+const AnalyticsTokenWidget = withAnalytics(TokenBalanceWidget);
+```
+
+### 렌더 프롭 패턴
+```typescript
+interface RenderTokenWidgetProps {
+  amount: number;
+  status: ColorStatus;
+  children: (props: {
+    formattedAmount: string;
+    statusColor: string;
+    isHealthy: boolean;
+  }) => React.ReactNode;
+}
+
+const RenderTokenWidget: React.FC<RenderTokenWidgetProps> = ({
+  amount,
+  status, 
+  children
+}) => {
+  const formattedAmount = formatAmount(amount);
+  const statusColor = getStatusColor(status);
+  const isHealthy = status === 'normal';
+  
+  return (
+    <>
+      {children({ formattedAmount, statusColor, isHealthy })}
+    </>
+  );
+};
+
+// 사용
+<RenderTokenWidget amount={1234567} status="normal">
+  {({ formattedAmount, statusColor, isHealthy }) => (
+    <div style={{ color: statusColor }}>
+      {isHealthy ? '✅' : '⚠️'} {formattedAmount}
+    </div>
+  )}
+</RenderTokenWidget>
+```
+
+---
+
+*마지막 업데이트: 2025년 6월 19일*
+*버전: 1.0.0*

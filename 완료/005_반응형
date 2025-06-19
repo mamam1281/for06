@@ -1,0 +1,722 @@
+# 📱 반응형 브레이크포인트
+
+CJ AI Dashboard 컴포넌트의 반응형 디자인을 위한 브레이크포인트와 미디어 쿼리 가이드입니다.
+
+## 📋 목차
+- [Tailwind CSS 브레이크포인트](#tailwind-css-브레이크포인트)
+- [커스텀 브레이크포인트](#커스텀-브레이크포인트)
+- [컴포넌트별 반응형 설정](#컴포넌트별-반응형-설정)
+- [미디어 쿼리 사용법](#미디어-쿼리-사용법)
+- [반응형 디자인 패턴](#반응형-디자인-패턴)
+- [성능 최적화](#성능-최적화)
+
+---
+
+## 📱 Tailwind CSS 브레이크포인트
+
+### 기본 브레이크포인트 시스템
+```css
+/* Mobile First 접근법 - 작은 화면부터 큰 화면으로 */
+
+/* xs: 475px 이상 (추가 소형 디바이스) */
+@media (min-width: 475px) {
+  /* 작은 모바일 디바이스용 스타일 */
+}
+
+/* sm: 640px 이상 (작은 태블릿, 큰 모바일) */
+@media (min-width: 640px) {
+  /* 작은 태블릿용 스타일 */
+}
+
+/* md: 768px 이상 (태블릿) */
+@media (min-width: 768px) {
+  /* 태블릿용 스타일 */
+}
+
+/* lg: 1024px 이상 (작은 데스크톱) */
+@media (min-width: 1024px) {
+  /* 작은 데스크톱용 스타일 */
+}
+
+/* xl: 1280px 이상 (데스크톱) */
+@media (min-width: 1280px) {
+  /* 데스크톱용 스타일 */
+}
+
+/* 2xl: 1536px 이상 (큰 데스크톱) */
+@media (min-width: 1536px) {
+  /* 큰 데스크톱용 스타일 */
+}
+```
+
+### 디바이스별 화면 크기 가이드
+```typescript
+export const deviceSizes = {
+  // 모바일 디바이스
+  mobile: {
+    small: '320px',      // iPhone SE, 갤럭시 S8 등
+    medium: '375px',     // iPhone 12/13/14, 갤럭시 S21 등
+    large: '414px'       // iPhone 12/13/14 Pro Max, 갤럭시 Note 등
+  },
+
+  // 태블릿 디바이스  
+  tablet: {
+    small: '768px',      // iPad Mini
+    medium: '820px',     // iPad Air
+    large: '1024px'      // iPad Pro
+  },
+
+  // 데스크톱 디바이스
+  desktop: {
+    small: '1280px',     // 작은 노트북
+    medium: '1440px',    // 일반 모니터
+    large: '1920px',     // Full HD 모니터
+    xlarge: '2560px'     // 4K 모니터
+  }
+};
+```
+
+### TypeScript 브레이크포인트 정의
+```typescript
+export type Breakpoint = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl';
+
+export const breakpoints: Record<Breakpoint, number> = {
+  xs: 475,
+  sm: 640,
+  md: 768,
+  lg: 1024,
+  xl: 1280,
+  '2xl': 1536
+};
+
+export const breakpointPx: Record<Breakpoint, string> = {
+  xs: '475px',
+  sm: '640px', 
+  md: '768px',
+  lg: '1024px',
+  xl: '1280px',
+  '2xl': '1536px'
+};
+```
+
+---
+
+## 🎯 커스텀 브레이크포인트
+
+### 프로젝트 전용 브레이크포인트
+```css
+/* CJ AI Dashboard 커스텀 브레이크포인트 */
+:root {
+  --bp-mobile-xs: 320px;      /* 극소형 모바일 */
+  --bp-mobile-sm: 375px;      /* 소형 모바일 */
+  --bp-mobile-md: 414px;      /* 중형 모바일 */
+  --bp-mobile-lg: 480px;      /* 대형 모바일 */
+  
+  --bp-tablet-sm: 600px;      /* 소형 태블릿 */
+  --bp-tablet-md: 768px;      /* 중형 태블릿 */
+  --bp-tablet-lg: 1024px;     /* 대형 태블릿 */
+  
+  --bp-desktop-sm: 1200px;    /* 소형 데스크톱 */
+  --bp-desktop-md: 1440px;    /* 중형 데스크톱 */
+  --bp-desktop-lg: 1680px;    /* 대형 데스크톱 */
+  --bp-desktop-xl: 1920px;    /* 초대형 데스크톱 */
+}
+```
+
+### 컨테이너 최대 너비
+```css
+.container {
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+/* 모바일 */
+@media (min-width: 475px) {
+  .container { max-width: 475px; }
+}
+
+/* 태블릿 */
+@media (min-width: 640px) {
+  .container { 
+    max-width: 640px; 
+    padding: 0 1.5rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .container { 
+    max-width: 768px; 
+    padding: 0 2rem;
+  }
+}
+
+/* 데스크톱 */
+@media (min-width: 1024px) {
+  .container { 
+    max-width: 1024px; 
+    padding: 0 2.5rem;
+  }
+}
+
+@media (min-width: 1280px) {
+  .container { 
+    max-width: 1280px; 
+    padding: 0 3rem;
+  }
+}
+
+@media (min-width: 1536px) {
+  .container { 
+    max-width: 1536px; 
+    padding: 0 4rem;
+  }
+}
+```
+
+---
+
+## 🧩 컴포넌트별 반응형 설정
+
+### Token Balance Widget 반응형
+```typescript
+export const tokenWidgetResponsive = {
+  // 컨테이너 크기
+  container: {
+    base: "w-full max-w-sm",           // 모바일: 384px 최대
+    sm: "sm:max-w-md",                 // 작은 태블릿: 448px 최대  
+    lg: "lg:max-w-lg"                  // 데스크톱: 512px 최대
+  },
+
+  // 패딩
+  padding: {
+    base: "p-4",                       // 모바일: 16px
+    sm: "sm:p-6",                      // 작은 태블릿: 24px
+    lg: "lg:p-8"                       // 데스크톱: 32px
+  },
+
+  // 폰트 크기
+  fontSize: {
+    title: {
+      base: "text-lg",                 // 모바일: 18px
+      sm: "sm:text-xl",                // 작은 태블릿: 20px
+      lg: "lg:text-2xl"                // 데스크톱: 24px
+    },
+    amount: {
+      base: "text-3xl",                // 모바일: 30px
+      sm: "sm:text-4xl",               // 작은 태블릿: 36px  
+      lg: "lg:text-5xl"                // 데스크톱: 48px
+    },
+    subtitle: {
+      base: "text-sm",                 // 모바일: 14px
+      sm: "sm:text-base"               // 작은 태블릿: 16px
+    }
+  },
+
+  // 아이콘 크기
+  iconSize: {
+    base: "w-4 h-4",                   // 모바일: 16px
+    sm: "sm:w-5 sm:h-5",               // 작은 태블릿: 20px
+    lg: "lg:w-6 lg:h-6"                // 데스크톱: 24px
+  },
+
+  // 간격
+  gap: {
+    base: "gap-2",                     // 모바일: 8px
+    sm: "sm:gap-3",                    // 작은 태블릿: 12px
+    lg: "lg:gap-4"                     // 데스크톱: 16px
+  }
+};
+
+// 사용 예시
+const responsiveClasses = [
+  tokenWidgetResponsive.container.base,
+  tokenWidgetResponsive.container.sm,
+  tokenWidgetResponsive.container.lg,
+  tokenWidgetResponsive.padding.base,
+  tokenWidgetResponsive.padding.sm,
+  tokenWidgetResponsive.padding.lg
+].join(' ');
+```
+
+### Chat Bubble 반응형
+```typescript
+export const chatBubbleResponsive = {
+  // 채팅창 크기
+  chatWindow: {
+    // 모바일: 전체 너비에서 여백 제외
+    mobile: "bottom-4 right-4 left-4 w-auto h-96",
+    // 태블릿 이상: 고정 크기
+    tablet: "sm:left-auto sm:w-80 sm:h-96",
+    desktop: "lg:w-96 lg:h-[32rem]"
+  },
+
+  // 채팅 버튼 크기
+  button: {
+    size: {
+      base: "w-12 h-12",               // 모바일: 48px
+      sm: "sm:w-14 sm:h-14"            // 태블릿: 56px
+    },
+    iconSize: {
+      base: "w-5 h-5",                 // 모바일: 20px
+      sm: "sm:w-6 sm:h-6"              // 태블릿: 24px
+    }
+  },
+
+  // 메시지 스타일
+  messages: {
+    maxWidth: {
+      base: "max-w-[70%]",             // 모바일: 70%
+      sm: "sm:max-w-[80%]"             // 태블릿: 80%
+    },
+    fontSize: {
+      base: "text-sm",                 // 모바일: 14px
+      sm: "sm:text-base"               // 태블릿: 16px
+    },
+    padding: {
+      base: "px-2 py-1",               // 모바일: 8px/4px
+      sm: "sm:px-3 sm:py-2"            // 태블릿: 12px/8px
+    }
+  },
+
+  // 위치 설정
+  positioning: {
+    mobile: {
+      'bottom-right': 'bottom-4 right-4',
+      'bottom-left': 'bottom-4 left-4',
+      'top-right': 'top-4 right-4',
+      'top-left': 'top-4 left-4'
+    },
+    desktop: {
+      'bottom-right': 'bottom-6 right-6',
+      'bottom-left': 'bottom-6 left-6', 
+      'top-right': 'top-6 right-6',
+      'top-left': 'top-6 left-6'
+    }
+  }
+};
+```
+
+### 레이아웃 그리드 반응형
+```typescript
+export const layoutResponsive = {
+  // 메인 그리드
+  mainGrid: {
+    base: "grid grid-cols-1",          // 모바일: 1열
+    lg: "lg:grid-cols-2",              // 데스크톱: 2열
+    xl: "xl:grid-cols-3"               // 큰 데스크톱: 3열
+  },
+
+  // 기능 그리드
+  featuresGrid: {
+    base: "grid grid-cols-1",          // 모바일: 1열
+    sm: "sm:grid-cols-2",              // 태블릿: 2열  
+    md: "md:grid-cols-3"               // 데스크톱: 3열
+  },
+
+  // 간격
+  gap: {
+    base: "gap-4",                     // 모바일: 16px
+    sm: "sm:gap-6",                    // 태블릿: 24px
+    lg: "lg:gap-8"                     // 데스크톱: 32px
+  }
+};
+```
+
+---
+
+## 🖥️ 미디어 쿼리 사용법
+
+### CSS 미디어 쿼리
+```css
+/* 기본 스타일 (모바일) */
+.component {
+  padding: 1rem;
+  font-size: 0.875rem;
+}
+
+/* 태블릿 */
+@media (min-width: 768px) {
+  .component {
+    padding: 1.5rem;
+    font-size: 1rem;
+  }
+}
+
+/* 데스크톱 */
+@media (min-width: 1024px) {
+  .component {
+    padding: 2rem;
+    font-size: 1.125rem;
+  }
+}
+
+/* 고해상도 화면 */
+@media (min-width: 1280px) {
+  .component {
+    padding: 2.5rem;
+    font-size: 1.25rem;
+  }
+}
+```
+
+### JavaScript Hook
+```typescript
+import { useState, useEffect } from 'react';
+
+export function useBreakpoint() {
+  const [breakpoint, setBreakpoint] = useState<Breakpoint>('xs');
+
+  useEffect(() => {
+    const updateBreakpoint = () => {
+      const width = window.innerWidth;
+      
+      if (width >= breakpoints['2xl']) setBreakpoint('2xl');
+      else if (width >= breakpoints.xl) setBreakpoint('xl');
+      else if (width >= breakpoints.lg) setBreakpoint('lg');
+      else if (width >= breakpoints.md) setBreakpoint('md');
+      else if (width >= breakpoints.sm) setBreakpoint('sm');
+      else setBreakpoint('xs');
+    };
+
+    updateBreakpoint();
+    window.addEventListener('resize', updateBreakpoint);
+    
+    return () => window.removeEventListener('resize', updateBreakpoint);
+  }, []);
+
+  return breakpoint;
+}
+
+// 사용 예시
+const MyComponent = () => {
+  const breakpoint = useBreakpoint();
+  const isMobile = breakpoint === 'xs' || breakpoint === 'sm';
+  const isDesktop = breakpoint === 'lg' || breakpoint === 'xl' || breakpoint === '2xl';
+
+  return (
+    <div className={`
+      ${isMobile ? 'p-4' : 'p-8'}
+      ${isDesktop ? 'max-w-4xl' : 'max-w-2xl'}
+    `}>
+      {/* 컴포넌트 내용 */}
+    </div>
+  );
+};
+```
+
+### 반응형 값 유틸리티
+```typescript
+export interface ResponsiveValue<T> {
+  xs?: T;
+  sm?: T;
+  md?: T;
+  lg?: T;
+  xl?: T;
+  '2xl'?: T;
+}
+
+export function getResponsiveValue<T>(
+  value: ResponsiveValue<T>,
+  breakpoint: Breakpoint,
+  fallback: T
+): T {
+  // 현재 브레이크포인트에서 사용 가능한 값 찾기
+  const breakpointOrder: Breakpoint[] = ['2xl', 'xl', 'lg', 'md', 'sm', 'xs'];
+  const currentIndex = breakpointOrder.indexOf(breakpoint);
+  
+  for (let i = currentIndex; i < breakpointOrder.length; i++) {
+    const bp = breakpointOrder[i];
+    if (value[bp] !== undefined) {
+      return value[bp]!;
+    }
+  }
+  
+  return fallback;
+}
+
+// 사용 예시
+const responsivePadding: ResponsiveValue<string> = {
+  xs: '1rem',
+  md: '1.5rem',
+  lg: '2rem'
+};
+
+const currentPadding = getResponsiveValue(
+  responsivePadding, 
+  useBreakpoint(), 
+  '1rem'
+);
+```
+
+---
+
+## 🎨 반응형 디자인 패턴
+
+### 1. Progressive Enhancement (점진적 개선)
+```css
+/* 기본 스타일 (모바일) */
+.card {
+  background: white;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* 태블릿 개선 */
+@media (min-width: 768px) {
+  .card {
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+}
+
+/* 데스크톱 개선 */
+@media (min-width: 1024px) {
+  .card {
+    padding: 2rem;
+    box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease;
+  }
+  
+  .card:hover {
+    transform: translateY(-2px);
+  }
+}
+```
+
+### 2. Container Queries (컨테이너 쿼리)
+```css
+/* 컨테이너 크기에 따른 스타일 */
+.token-widget {
+  container-type: inline-size;
+}
+
+@container (min-width: 300px) {
+  .token-widget__content {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 1rem;
+  }
+}
+
+@container (min-width: 400px) {
+  .token-widget__amount {
+    font-size: 2.5rem;
+  }
+}
+```
+
+### 3. Adaptive Components
+```typescript
+interface AdaptiveProps {
+  children: React.ReactNode;
+  mobileLayout?: React.ComponentType;
+  desktopLayout?: React.ComponentType;
+}
+
+const AdaptiveComponent: React.FC<AdaptiveProps> = ({
+  children,
+  mobileLayout: MobileLayout,
+  desktopLayout: DesktopLayout
+}) => {
+  const breakpoint = useBreakpoint();
+  const isMobile = breakpoint === 'xs' || breakpoint === 'sm';
+  
+  if (isMobile && MobileLayout) {
+    return <MobileLayout>{children}</MobileLayout>;
+  }
+  
+  if (!isMobile && DesktopLayout) {
+    return <DesktopLayout>{children}</DesktopLayout>;
+  }
+  
+  return <>{children}</>;
+};
+```
+
+### 4. 반응형 이미지
+```css
+.responsive-image {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+}
+
+/* 모바일: 16:9 비율 */
+@media (max-width: 767px) {
+  .responsive-image {
+    aspect-ratio: 16/9;
+  }
+}
+
+/* 태블릿: 4:3 비율 */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .responsive-image {
+    aspect-ratio: 4/3;
+  }
+}
+
+/* 데스크톱: 21:9 비율 */
+@media (min-width: 1024px) {
+  .responsive-image {
+    aspect-ratio: 21/9;
+  }
+}
+```
+
+---
+
+## ⚡ 성능 최적화
+
+### 1. 미디어 쿼리 최적화
+```css
+/* ✅ 권장: 논리적 그룹핑 */
+@media (min-width: 768px) {
+  .component-a { padding: 1.5rem; }
+  .component-b { margin: 1rem; }
+  .component-c { font-size: 1.125rem; }
+}
+
+/* ❌ 비권장: 분산된 미디어 쿼리 */
+.component-a {
+  padding: 1rem;
+}
+@media (min-width: 768px) {
+  .component-a { padding: 1.5rem; }
+}
+
+.component-b {
+  margin: 0.5rem;  
+}
+@media (min-width: 768px) {
+  .component-b { margin: 1rem; }
+}
+```
+
+### 2. 조건부 로딩
+```typescript
+// 큰 화면에서만 복잡한 컴포넌트 로드
+const HeavyDesktopComponent = lazy(() => import('./HeavyDesktopComponent'));
+
+const ResponsiveApp = () => {
+  const breakpoint = useBreakpoint();
+  const isDesktop = breakpoint === 'lg' || breakpoint === 'xl' || breakpoint === '2xl';
+  
+  return (
+    <div>
+      {/* 기본 컴포넌트 */}
+      <TokenBalanceWidget />
+      <CJAIChatBubble />
+      
+      {/* 데스크톱 전용 컴포넌트 */}
+      {isDesktop && (
+        <Suspense fallback={<div>Loading...</div>}>
+          <HeavyDesktopComponent />
+        </Suspense>
+      )}
+    </div>
+  );
+};
+```
+
+### 3. 이미지 최적화
+```typescript
+interface ResponsiveImageProps {
+  src: string;
+  alt: string;
+  sizes?: string;
+}
+
+const ResponsiveImage: React.FC<ResponsiveImageProps> = ({
+  src,
+  alt,
+  sizes = "(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+}) => {
+  return (
+    <img
+      src={src}
+      alt={alt}
+      sizes={sizes}
+      srcSet={`
+        ${src}?w=400 400w,
+        ${src}?w=800 800w,
+        ${src}?w=1200 1200w
+      `}
+      loading="lazy"
+      decoding="async"
+    />
+  );
+};
+```
+
+### 4. 폰트 최적화
+```css
+/* 반응형 폰트 크기 - clamp 사용 */
+.responsive-heading {
+  font-size: clamp(1.5rem, 4vw, 3rem);
+  line-height: 1.2;
+}
+
+.responsive-body {
+  font-size: clamp(0.875rem, 2.5vw, 1.125rem);
+  line-height: 1.6;
+}
+
+/* 뷰포트 단위 사용 */
+.hero-title {
+  font-size: min(8vw, 4rem);
+}
+```
+
+---
+
+## 📊 테스트 및 디버깅
+
+### 브레이크포인트 디버깅 도구
+```typescript
+// 개발 환경에서만 사용하는 브레이크포인트 표시기
+const BreakpointIndicator = () => {
+  const breakpoint = useBreakpoint();
+  
+  if (process.env.NODE_ENV !== 'development') return null;
+  
+  return (
+    <div className="fixed top-4 left-4 bg-black text-white px-2 py-1 rounded text-sm z-50">
+      Current: {breakpoint} ({window.innerWidth}px)
+    </div>
+  );
+};
+```
+
+### 반응형 테스트 체크리스트
+```markdown
+## 반응형 테스트 체크리스트
+
+### 모바일 (320px - 768px)
+- [ ] 모든 텍스트가 읽기 쉬운가?
+- [ ] 터치 타겟이 최소 44px 이상인가?  
+- [ ] 스크롤이 부드럽게 작동하는가?
+- [ ] 가로 스크롤이 발생하지 않는가?
+
+### 태블릿 (768px - 1024px)
+- [ ] 레이아웃이 적절히 조정되는가?
+- [ ] 텍스트 크기가 적절한가?
+- [ ] 터치와 마우스 모두 잘 작동하는가?
+
+### 데스크톱 (1024px+)
+- [ ] 호버 효과가 작동하는가?
+- [ ] 레이아웃이 너무 늘어나지 않는가?
+- [ ] 키보드 내비게이션이 가능한가?
+
+### 극한 케이스
+- [ ] 매우 긴 텍스트 처리
+- [ ] 매우 작은 화면 (320px)
+- [ ] 매우 큰 화면 (2560px+)
+- [ ] 확대/축소 (200% 줌)
+```
+
+---
+
+*마지막 업데이트: 2025년 6월 19일*
+*버전: 1.0.0*
